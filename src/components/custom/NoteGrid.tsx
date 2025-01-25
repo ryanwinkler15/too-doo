@@ -1,39 +1,21 @@
-import { cn } from "@/lib/utils";
-import { NoteCard } from "./NoteCard";
-
-interface Note {
-  id: string;
-  title: string;
-  description: string;
-  label_id?: string;
-  due_date?: string;
-  label?: {
-    name: string;
-    color: string;
-  };
-}
+import { NoteCard } from "@/components/custom/NoteCard";
+import { Note } from "@/lib/types";
 
 interface NoteGridProps {
   notes: Note[];
-  className?: string;
   onDelete?: () => void;
 }
 
-export function NoteGrid({ notes, className, onDelete }: NoteGridProps) {
+export function NoteGrid({ notes, onDelete }: NoteGridProps) {
   return (
-    <div
-      className={cn(
-        "grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
-        className
-      )}
-    >
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {notes.map((note) => (
         <NoteCard
           key={note.id}
           id={note.id}
           title={note.title}
           description={note.description}
-          label={note.label}
+          label={note.label || undefined}
           dueDate={note.due_date}
           onDelete={onDelete}
         />

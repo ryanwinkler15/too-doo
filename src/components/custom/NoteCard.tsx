@@ -3,9 +3,11 @@ import { Check, Pencil, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from "@/hooks/use-toast";
+import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
+import { Note } from "@/lib/types";
 
 // Utility function to darken a hex color
 function darkenColor(hex: string, percent: number) {
@@ -37,10 +39,7 @@ interface NoteCardProps {
   title: string;
   description: string;
   className?: string;
-  label?: {
-    name: string;
-    color: string;
-  };
+  label?: Note['label'];
   dueDate?: string;
   onDelete?: () => void;
 }
@@ -49,6 +48,22 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
   const supabase = createClientComponentClient();
   const [isDeleted, setIsDeleted] = useState(false);
   const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Log props when component receives them
+  useEffect(() => {
+    console.log('NoteCard received props:', {
+      id,
+      title,
+      description,
+      label: label ? {
+        id: label.id,
+        name: label.name,
+        color: label.color
+      } : 'no label',
+      dueDate
+    });
+  }, [id, title, description, label, dueDate]);
 
   // Default colors if no label is present
   const defaultBg = "bg-slate-900";
@@ -119,85 +134,121 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
   if (isDeleted) return null;
 
   return (
-    <div
-      className={cn(
-        "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl",
-        cardStyle ? "" : defaultBg,
-        cardStyle ? "" : defaultBorder,
-        "transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
-        className
-      )}
-      style={cardStyle ? {
-        backgroundColor: cardStyle.background,
-        borderColor: cardStyle.border
-      } : undefined}
-    >
-      <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 pl-4 pr-6 pt-4 pb-6 transition-all duration-300 group-hover:-translate-y-10">
-        <BellIcon className={cn(
-          "h-12 w-12 transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75",
-          label ? "text-white text-opacity-90" : "text-slate-400"
-        )} />
-        
-        {/* Label and Due Date Row */}
-        <div className="flex items-start gap-2 mt-1 mb-2">
-          {label && (
-            <div 
-              className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
-              style={{ backgroundColor: darkenColor(label.color, 15) }}
-            >
-              {label.name}
-            </div>
-          )}
-          {dueDate && (
-            <div className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
-              {format(new Date(dueDate), "MM/dd/yy")}
-            </div>
-          )}
-        </div>
-
-        <h3 className="text-xl font-semibold text-white">
-          {title}
-        </h3>
-        <p className="text-white text-opacity-90">
-          {description}
-        </p>
-      </div>
-
+    <>
       <div
         className={cn(
-          "pointer-events-none absolute bottom-0 flex w-full justify-between items-center px-3 py-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100",
-          "transform-gpu translate-y-10"
+          "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl",
+          cardStyle ? "" : defaultBg,
+          cardStyle ? "" : defaultBorder,
+          "transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+          className
         )}
+        style={cardStyle ? {
+          backgroundColor: cardStyle.background,
+          borderColor: cardStyle.border
+        } : undefined}
       >
-        {/* Left side - Complete button */}
-        <div 
-          className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
-        >
-          <Check className="w-5 h-5" strokeWidth={2} />
+        <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 pl-4 pr-6 pt-4 pb-6 transition-all duration-300 group-hover:-translate-y-10">
+          <BellIcon className={cn(
+            "h-12 w-12 transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75",
+            label ? "text-white text-opacity-90" : "text-slate-400"
+          )} />
+          
+          {/* Label and Due Date Row */}
+          <div className="flex items-start gap-2 mt-1 mb-2">
+            {label && (
+              <div 
+                className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
+                style={{ backgroundColor: darkenColor(label.color, 15) }}
+              >
+                {label.name}
+              </div>
+            )}
+            {dueDate && (
+              <div className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
+                {format(new Date(dueDate), "MM/dd/yy")}
+              </div>
+            )}
+          </div>
+
+          <h3 className="text-xl font-semibold text-white">
+            {title}
+          </h3>
+          <p className="text-white text-opacity-90">
+            {description}
+          </p>
         </div>
 
-        {/* Right side - Edit and Delete buttons */}
-        <div className="flex gap-2">
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-0 flex w-full justify-between items-center px-3 py-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100",
+            "transform-gpu translate-y-10"
+          )}
+        >
+          {/* Left side - Complete button */}
           <div 
             className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
           >
-            <Pencil className="w-5 h-5" strokeWidth={2} />
+            <Check className="w-5 h-5" strokeWidth={2} />
           </div>
-          <button 
-            onClick={handleDelete}
-            className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
-          >
-            <Trash2 className="w-5 h-5" strokeWidth={2} />
-          </button>
+
+          {/* Right side - Edit and Delete buttons */}
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                console.log('Raw label data:', label);
+                console.log('Editing note:', {
+                  title,
+                  description,
+                  label_id: label?.id,
+                  label_name: label?.name,
+                  label_color: label?.color,
+                  dueDate
+                });
+                setIsEditing(true);
+              }}
+              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
+            >
+              <Pencil className="w-5 h-5" strokeWidth={2} />
+            </button>
+            <button 
+              onClick={handleDelete}
+              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
+            >
+              <Trash2 className="w-5 h-5" strokeWidth={2} />
+            </button>
+          </div>
         </div>
+        <div 
+          className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300"
+          style={cardStyle ? {
+            backgroundColor: "transparent",
+            ["--hover-bg" as any]: cardStyle.hoverBg
+          } : undefined}
+        />
       </div>
-      <div 
-        className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300"
-        style={cardStyle ? {
-          backgroundColor: "transparent",
-          ["--hover-bg" as any]: cardStyle.hoverBg
-        } : undefined}
+
+      {/* Edit Dialog */}
+      <CreateNoteDialog
+        mode="edit"
+        noteToEdit={{
+          id,
+          title,
+          description,
+          label_id: label?.id,
+          due_date: dueDate,
+          label: label ? {
+            name: label.name,
+            color: label.color
+          } : undefined
+        }}
+        onNoteCreated={() => {
+          onDelete?.();
+          setIsEditing(false);
+        }}
+        isOpen={isEditing}
+        onOpenChange={setIsEditing}
       />
-    </div>
+    </>
   );
 } 

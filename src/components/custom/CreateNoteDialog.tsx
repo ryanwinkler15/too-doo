@@ -53,25 +53,49 @@ type CommandProps = React.ComponentPropsWithoutRef<typeof Command>;
 
 interface CreateNoteDialogProps {
   onNoteCreated?: () => void;
+  mode?: 'create' | 'edit';
+  noteToEdit?: {
+    id: string;
+    title: string;
+    description: string;
+    label_id?: string;
+    due_date?: string;
+    label?: {
+      name: string;
+      color: string;
+    };
+  };
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState<Date>();
-  const [open, setOpen] = useState(false);
+export function CreateNoteDialog({ 
+  onNoteCreated, 
+  mode = 'create', 
+  noteToEdit,
+  isOpen,
+  onOpenChange
+}: CreateNoteDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [title, setTitle] = useState(noteToEdit?.title ?? "");
+  const [description, setDescription] = useState(noteToEdit?.description ?? "");
+  const [date, setDate] = useState<Date | undefined>(
+    noteToEdit?.due_date ? new Date(noteToEdit.due_date) : undefined
+  );
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
   const [newLabelTitle, setNewLabelTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0].value);
   const [savedLabels, setSavedLabels] = useState<SavedLabel[]>([]);
   const [labelPopoverOpen, setLabelPopoverOpen] = useState(false);
-  const [selectedLabelId, setSelectedLabelId] = useState("");
+  const [selectedLabelId, setSelectedLabelId] = useState(noteToEdit?.label_id || "");
   const [error, setError] = useState("");
   
   const supabase = createClientComponentClient();
 
+  // Single effect to handle both label loading and form initialization
   useEffect(() => {
-    async function loadLabels() {
+    async function initialize() {
+      // Load labels
       const { data: labels, error } = await supabase
         .from('labels')
         .select('*')
@@ -84,38 +108,69 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
 
       if (labels) {
         setSavedLabels(labels);
+        // If we're in edit mode and have a label_id, find and select that label
+        if (mode === 'edit' && noteToEdit?.label_id) {
+          const matchingLabel = labels.find(label => label.id === noteToEdit.label_id);
+          if (matchingLabel) {
+            setSelectedLabelId(matchingLabel.id);
+          }
+        }
+      }
+
+      // Initialize form data in edit mode
+      if (mode === 'edit' && noteToEdit && isOpen) {
+        setTitle(noteToEdit.title);
+        setDescription(noteToEdit.description);
+        setDate(noteToEdit.due_date ? new Date(noteToEdit.due_date) : undefined);
       }
     }
 
-    loadLabels();
-  }, [supabase]);
+    initialize();
+  }, [mode, noteToEdit, isOpen, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating note:', { title, description, label: selectedLabelId, date });
+    console.log(mode === 'create' ? 'Creating note:' : 'Updating note:', { title, description, label: selectedLabelId, date });
 
     try {
-      const { data: newNote, error } = await supabase
-        .from('notes')
-        .insert([
-          {
+      if (mode === 'create') {
+        const { data: newNote, error } = await supabase
+          .from('notes')
+          .insert([
+            {
+              title,
+              description,
+              label_id: selectedLabelId || null,
+              due_date: date?.toISOString() || null,
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        console.log('Note created:', newNote);
+      } else {
+        const { error } = await supabase
+          .from('notes')
+          .update({
             title,
             description,
             label_id: selectedLabelId || null,
             due_date: date?.toISOString() || null,
-          }
-        ])
-        .select()
-        .single();
+          })
+          .eq('id', noteToEdit?.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      console.log('Note created:', newNote);
-      setOpen(false);
+        console.log('Note updated');
+      }
+
+      setInternalOpen(false);
       onNoteCreated?.();
     } catch (error) {
-      console.error('Error creating note:', error);
-      setError('Failed to create note. Please try again.');
+      console.error(mode === 'create' ? 'Error creating note:' : 'Error updating note:', error);
+      setError(`Failed to ${mode === 'create' ? 'create' : 'update'} note. Please try again.`);
     }
   };
 
@@ -152,6 +207,7 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
   const handleCommandSelect = (value: string) => {
     const label = savedLabels.find(l => l.name === value);
     if (label) {
+      console.log('Setting selected label:', label);
       setSelectedLabelId(label.id);
       setLabelPopoverOpen(false);
     }
@@ -159,27 +215,38 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
 
   // Reset form state when dialog opens
   const handleDialogOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (open) {
-      // Reset all form fields when opening
+    if (mode === 'create') {
+      setInternalOpen(open);
+    } else {
+      onOpenChange?.(open);
+    }
+    
+    if (open && mode === 'create') {
+      // Only reset fields when creating a new note
       setTitle("");
       setDescription("");
       setDate(undefined);
-      setSelectedLabelId(""); // Reset selected label
+      setSelectedLabelId("");
     }
   };
 
+  const actualOpen = mode === 'create' ? internalOpen : isOpen;
+
   return (
     <>
-      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      <Dialog open={actualOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-            New
-          </Button>
+          {mode === 'create' ? (
+            <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
+              New
+            </Button>
+          ) : null}
         </DialogTrigger>
         <DialogContent className="bg-slate-900 text-white border-slate-800">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Create New Note</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              {mode === 'create' ? 'Create New Note' : 'Edit Note'}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -358,7 +425,7 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => setInternalOpen(false)}
                 className="bg-slate-800 hover:bg-slate-700"
               >
                 Cancel
@@ -367,7 +434,7 @@ export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                Create Note
+                {mode === 'create' ? 'Create Note' : 'Update Note'}
               </Button>
             </div>
           </form>

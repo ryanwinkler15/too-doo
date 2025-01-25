@@ -5,29 +5,24 @@ import { Button } from "@/components/ui/button";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { NoteGrid } from "@/components/custom/NoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
-interface Note {
-  id: string;
-  title: string;
-  description: string;
-  label_id?: string;
-  due_date?: string;
-  label?: {
-    name: string;
-    color: string;
-  };
-}
+import { Plus } from "lucide-react";
+import { Note } from "@/lib/types";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
   const supabase = createClientComponentClient();
 
   const fetchNotes = async () => {
-    const { data, error } = await supabase
+    const { data: rawData, error } = await supabase
       .from('notes')
       .select(`
-        *,
+        id,
+        title,
+        description,
+        due_date,
         label:label_id (
+          id,
           name,
           color
         )
@@ -39,8 +34,13 @@ export default function Home() {
       return;
     }
 
-    if (data) {
-      setNotes(data);
+    if (rawData) {
+      // Transform the data to handle the array of labels
+      const transformedData = rawData.map(note => ({
+        ...note,
+        label: Array.isArray(note.label) ? note.label[0] : note.label
+      }));
+      setNotes(transformedData);
     }
   };
 
