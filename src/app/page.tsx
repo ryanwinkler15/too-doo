@@ -7,8 +7,15 @@ import { NoteGrid } from "@/components/custom/NoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface Note {
+  id: string;
   title: string;
   description: string;
+  label_id?: string;
+  due_date?: string;
+  label?: {
+    name: string;
+    color: string;
+  };
 }
 
 export default function Home() {
@@ -18,7 +25,13 @@ export default function Home() {
   const fetchNotes = async () => {
     const { data, error } = await supabase
       .from('notes')
-      .select('*')
+      .select(`
+        *,
+        label:label_id (
+          name,
+          color
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -66,7 +79,7 @@ export default function Home() {
       
       {/* Main Content Area - Note Grid */}
       <div className="px-4">
-        <NoteGrid notes={notes} />
+        <NoteGrid notes={notes} onDelete={fetchNotes} />
       </div>
     </div>
   );
