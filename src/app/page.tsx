@@ -1,7 +1,40 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
+import { NoteGrid } from "@/components/custom/NoteGrid";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+interface Note {
+  title: string;
+  description: string;
+}
 
 export default function Home() {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const supabase = createClientComponentClient();
+
+  const fetchNotes = async () => {
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching notes:', error);
+      return;
+    }
+
+    if (data) {
+      setNotes(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
       {/* Title */}
@@ -21,7 +54,7 @@ export default function Home() {
         
         {/* Right side - Action Buttons */}
         <div className="space-x-2">
-          <CreateNoteDialog />
+          <CreateNoteDialog onNoteCreated={fetchNotes} />
           <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
             Organize
           </Button>
@@ -31,9 +64,9 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Main Content Area - To be filled later */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Todo items will go here */}
+      {/* Main Content Area - Note Grid */}
+      <div className="px-4">
+        <NoteGrid notes={notes} />
       </div>
     </div>
   );

@@ -51,7 +51,11 @@ interface SavedLabel {
 type CommandItemProps = React.ComponentPropsWithoutRef<typeof CommandItem>;
 type CommandProps = React.ComponentPropsWithoutRef<typeof Command>;
 
-export function CreateNoteDialog() {
+interface CreateNoteDialogProps {
+  onNoteCreated?: () => void;
+}
+
+export function CreateNoteDialog({ onNoteCreated }: CreateNoteDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState<Date>();
@@ -86,11 +90,33 @@ export function CreateNoteDialog() {
     loadLabels();
   }, [supabase]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedLabel = savedLabels.find(label => label.id === selectedLabelId);
-    console.log({ title, description, label: selectedLabel, date });
-    setOpen(false);
+    console.log('Creating note:', { title, description, label: selectedLabelId, date });
+
+    try {
+      const { data: newNote, error } = await supabase
+        .from('notes')
+        .insert([
+          {
+            title,
+            description,
+            label_id: selectedLabelId || null,
+            due_date: date?.toISOString() || null,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('Note created:', newNote);
+      setOpen(false);
+      onNoteCreated?.();
+    } catch (error) {
+      console.error('Error creating note:', error);
+      setError('Failed to create note. Please try again.');
+    }
   };
 
   const handleCreateLabel = async (e: React.FormEvent) => {
