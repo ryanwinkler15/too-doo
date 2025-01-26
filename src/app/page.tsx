@@ -8,14 +8,16 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Plus } from "lucide-react";
 import { Note } from "@/lib/types";
 import Link from "next/link";
+import { OrganizeMenu } from "@/components/custom/OrganizeMenu";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const supabase = createClientComponentClient();
 
   const fetchNotes = async () => {
-    const { data: rawData, error } = await supabase
+    let query = supabase
       .from('notes')
       .select(`
         id,
@@ -31,13 +33,19 @@ export default function Home() {
       .eq('is_completed', false)
       .order('created_at', { ascending: false });
 
+    // Add label filter if selected
+    if (selectedLabelId) {
+      query = query.eq('label_id', selectedLabelId);
+    }
+
+    const { data: rawData, error } = await query;
+
     if (error) {
       console.error('Error fetching notes:', error);
       return;
     }
 
     if (rawData) {
-      // Transform the data to handle the array of labels
       const transformedData = rawData.map(note => ({
         ...note,
         label: Array.isArray(note.label) ? note.label[0] : note.label
@@ -48,7 +56,11 @@ export default function Home() {
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [selectedLabelId]); // Re-fetch when label filter changes
+
+  const handleLabelSelect = (labelId: string) => {
+    setSelectedLabelId(labelId === selectedLabelId ? null : labelId);
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
@@ -72,9 +84,7 @@ export default function Home() {
         {/* Right side - Action Buttons */}
         <div className="space-x-2">
           <CreateNoteDialog onNoteCreated={fetchNotes} />
-          <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-            Organize
-          </Button>
+          <OrganizeMenu onLabelSelect={handleLabelSelect} />
           <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
             Prioritize
           </Button>
