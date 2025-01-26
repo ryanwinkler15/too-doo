@@ -2,19 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { NoteGrid } from "@/components/custom/NoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Plus } from "lucide-react";
 import { Note } from "@/lib/types";
-import Link from "next/link";
+import Link from 'next/link';
 
-export default function Home() {
+export default function CompletedPage() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
   const supabase = createClientComponentClient();
 
-  const fetchNotes = async () => {
+  const fetchCompletedNotes = async () => {
     const { data: rawData, error } = await supabase
       .from('notes')
       .select(`
@@ -28,16 +25,15 @@ export default function Home() {
           color
         )
       `)
-      .eq('is_completed', false)
+      .eq('is_completed', true)  // Using is_completed instead of completed
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching notes:', error);
+      console.error('Error fetching completed notes:', error);
       return;
     }
 
     if (rawData) {
-      // Transform the data to handle the array of labels
       const transformedData = rawData.map(note => ({
         ...note,
         label: Array.isArray(note.label) ? note.label[0] : note.label
@@ -47,44 +43,33 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchNotes();
+    fetchCompletedNotes();
   }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
       {/* Title */}
-      <h1 className="text-4xl font-bold text-center mb-8">Do it all</h1>
+      <h1 className="text-4xl font-bold text-center mb-8">Completed Tasks</h1>
       
       {/* Header Bar */}
       <div className="flex justify-between items-center mb-8">
         {/* Left side - View Toggle */}
         <div className="space-x-2">
-          <Button variant="outline" className="bg-blue-600 text-white hover:bg-blue-700">
-            Active
-          </Button>
-          <Link href="/completed">
+          <Link href="/">
             <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-              Completed
+              Active
             </Button>
           </Link>
-        </div>
-        
-        {/* Right side - Action Buttons */}
-        <div className="space-x-2">
-          <CreateNoteDialog onNoteCreated={fetchNotes} />
-          <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-            Organize
-          </Button>
-          <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-            Prioritize
+          <Button variant="outline" className="bg-blue-600 text-white hover:bg-blue-700">
+            Completed
           </Button>
         </div>
       </div>
       
       {/* Main Content Area - Note Grid */}
       <div className="px-4">
-        <NoteGrid notes={notes} onDelete={fetchNotes} />
+        <NoteGrid notes={notes} onDelete={fetchCompletedNotes} />
       </div>
     </div>
   );
-}
+} 

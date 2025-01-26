@@ -131,6 +131,30 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     });
   };
 
+  const handleComplete = async () => {
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .update({ is_completed: true })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      onDelete?.(); // Refresh the notes list
+      toast({
+        description: "Note marked as completed",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error completing note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete note",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (isDeleted) return null;
 
   return (
@@ -187,6 +211,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         >
           {/* Left side - Complete button */}
           <div 
+            onClick={handleComplete}
             className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
           >
             <Check className="w-5 h-5" strokeWidth={2} />
