@@ -119,7 +119,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 p-8 overflow-auto"
+            className="fixed inset-0 bg-black/50 z-50 p-8 pt-32 overflow-auto"
             onClick={handleBackdropClick}
           >
             <motion.div
@@ -129,7 +129,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
               className="w-full max-w-[1800px] mx-auto"
             >
               {/* Title of expanded stack */}
-              <h2 className="text-3xl font-bold text-white mb-8 text-center">
+              <h2 className="text-3xl font-bold text-white mb-12 text-center">
                 {expandedStack} Notes
               </h2>
               
@@ -153,7 +153,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
           </motion.div>
         ) : (
           // Stacked view
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-24 pt-16">
             {groupedNotes.map((group) => (
               <div key={group.label.name} className="flex items-center justify-center">
                 {/* Stack container */}
@@ -162,12 +162,9 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                   onClick={() => setExpandedStack(group.label.name)}
                 >
                   {/* Stacked notes - render these FIRST so they appear behind the label card */}
-                  {group.notes.map((note, index) => {
-                    const reversedIndex = group.notes.length - 1 - index;
-                    
-                    // Create a clean stack effect with small, consistent steps
-                    const xOffset = 3 * (reversedIndex + 1);  // 3px step to the right
-                    const yOffset = -2 * (reversedIndex + 1); // -2px step upward
+                  {group.notes.slice(0, 5).map((note, index) => {
+                    const xOffset = 20 * (index + 1);  // Right step (20px)
+                    const yOffset = -15 * (index + 1); // Up step (-15px)
 
                     return (
                       <motion.div
@@ -175,17 +172,19 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                         className="absolute inset-0 w-[400px] h-[200px]"
                         style={{
                           transform: `translate(${xOffset}px, ${yOffset}px)`,
-                          zIndex: 10 + reversedIndex,
+                          zIndex: 19 - index,
                         }}
                       >
-                        <NoteCard
-                          id={note.id}
-                          title={note.title}
-                          description={note.description}
-                          label={note.label}
-                          dueDate={note.due_date}
-                          onDelete={onDelete}
-                        />
+                        <div className="h-full w-full border border-slate-600/50 rounded-xl shadow-md">
+                          <NoteCard
+                            id={note.id}
+                            title={note.title}
+                            description={note.description}
+                            label={note.label}
+                            dueDate={note.due_date}
+                            onDelete={onDelete}
+                          />
+                        </div>
                       </motion.div>
                     );
                   })}
