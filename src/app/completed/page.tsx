@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { NoteGrid } from "@/components/custom/NoteGrid";
+import { FannedNoteGrid } from "@/components/custom/FannedNoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Note } from "@/lib/types";
 import Link from 'next/link';
@@ -25,7 +25,7 @@ export default function CompletedPage() {
           color
         )
       `)
-      .eq('is_completed', true)  // Using is_completed instead of completed
+      .eq('is_completed', true)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -66,9 +66,9 @@ export default function CompletedPage() {
         </div>
       </div>
       
-      {/* Main Content Area - Note Grid */}
+      {/* Main Content Area - Fanned Note Grid */}
       <div className="px-4">
-        <NoteGrid notes={notes} onDelete={fetchCompletedNotes} />
+        <FannedNoteGrid notes={notes} onDelete={fetchCompletedNotes} />
       </div>
     </div>
   );

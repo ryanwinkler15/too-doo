@@ -1,5 +1,4 @@
-import { BellIcon } from "@radix-ui/react-icons";
-import { Check, Pencil, Trash2, X } from "lucide-react";
+import { Check, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -161,7 +160,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     <>
       <div
         className={cn(
-          "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl",
+          "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl h-[200px]",
           cardStyle ? "" : defaultBg,
           cardStyle ? "" : defaultBorder,
           "transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
@@ -172,14 +171,9 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           borderColor: cardStyle.border
         } : undefined}
       >
-        <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 pl-4 pr-6 pt-4 pb-6 transition-all duration-300 group-hover:-translate-y-10">
-          <BellIcon className={cn(
-            "h-12 w-12 transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75",
-            label ? "text-white text-opacity-90" : "text-slate-400"
-          )} />
-          
+        <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-4 h-full transition-all duration-300 group-hover:-translate-y-10">
           {/* Label and Due Date Row */}
-          <div className="flex items-start gap-2 mt-1 mb-2">
+          <div className="flex items-start gap-2 mb-3">
             {label && (
               <div 
                 className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
@@ -195,10 +189,10 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
             )}
           </div>
 
-          <h3 className="text-xl font-semibold text-white">
+          <h3 className="text-xl font-semibold text-white mb-2">
             {title}
           </h3>
-          <p className="text-white text-opacity-90">
+          <p className="text-white text-opacity-90 line-clamp-3">
             {description}
           </p>
         </div>

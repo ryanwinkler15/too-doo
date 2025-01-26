@@ -411,6 +411,13 @@ export function CreateNoteDialog({
                       const calendarButton = document.querySelector('[data-calendar-button="true"]');
                       if (calendarButton instanceof HTMLElement) {
                         calendarButton.click(); // Close the popover
+                        // Focus the create/update button after a short delay to ensure the popover is closed
+                        setTimeout(() => {
+                          const submitButton = document.querySelector('[data-submit-button="true"]');
+                          if (submitButton instanceof HTMLElement) {
+                            submitButton.focus();
+                          }
+                        }, 100);
                       }
                     }}
                     defaultMonth={date || new Date()}
@@ -431,6 +438,7 @@ export function CreateNoteDialog({
                 Cancel
               </Button>
               <Button
+                data-submit-button="true"
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700"
               >
