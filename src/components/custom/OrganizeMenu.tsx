@@ -43,6 +43,7 @@ export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
   const [open, setOpen] = React.useState(false)
   const [labelValue, setLabelValue] = React.useState("")
   const [showLabels, setShowLabels] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
   const supabase = createClientComponentClient();
 
@@ -73,8 +74,25 @@ export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 0);
-    }
+      }
   }, [showLabels]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchValue) {
+      // Find the first label that matches the search value
+      const matchingLabel = labels.find(label => 
+        label.name.toLowerCase().includes(searchValue.toLowerCase())
+      );
+
+      if (matchingLabel) {
+        e.preventDefault();
+        setLabelValue(matchingLabel.name);
+        onLabelSelect(matchingLabel.id);
+        setShowLabels(false);
+        setSearchValue("");
+      }
+    }
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -106,6 +124,14 @@ export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
           <PopoverContent 
             className="p-0 bg-slate-900 border-slate-800 w-56" 
             align="start"
+            alignOffset={-5}
+            sideOffset={0}
+            onOpenAutoFocus={(event) => {
+              event.preventDefault()
+              setTimeout(() => {
+                inputRef.current?.focus()
+              }, 0)
+            }}
             onInteractOutside={(e) => {
               e.preventDefault();
             }}
@@ -114,6 +140,9 @@ export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
               <CommandInput 
                 ref={inputRef}
                 placeholder="Search labels..." 
+                value={searchValue}
+                onValueChange={setSearchValue}
+                onKeyDown={handleKeyDown}
                 className="text-white placeholder:text-slate-400 border-slate-800"
               />
               <CommandEmpty className="text-white">No label found.</CommandEmpty>

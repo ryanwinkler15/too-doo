@@ -174,20 +174,20 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-4 h-full transition-all duration-300 group-hover:-translate-y-10">
           {/* Label and Due Date Row */}
           <div className="flex items-start gap-2 mb-3">
-            {label && (
-              <div 
+          {label && (
+            <div
                 className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
                 style={{ backgroundColor: darkenColor(label.color, 15) }}
-              >
-                {label.name}
-              </div>
-            )}
-            {dueDate && (
+            >
+              {label.name}
+            </div>
+          )}
+          {dueDate && (
               <div className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
                 {format(new Date(dueDate), "MM/dd/yy")}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
           <h3 className="text-xl font-semibold text-white mb-2">
             {title}
@@ -205,9 +205,9 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         >
           {/* Left side - Complete button */}
           <div 
-            onClick={handleComplete}
+              onClick={handleComplete}
             className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
-          >
+            >
             <Check className="w-5 h-5" strokeWidth={2} />
           </div>
 
@@ -237,6 +237,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
               <Trash2 className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
+
         </div>
         <div 
           className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300"

@@ -14,6 +14,7 @@ export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const supabase = createClientComponentClient();
 
   const fetchNotes = async () => {
@@ -83,17 +84,23 @@ export default function Home() {
         
         {/* Right side - Action Buttons */}
         <div className="space-x-2">
-          <CreateNoteDialog onNoteCreated={fetchNotes} />
-          <OrganizeMenu onLabelSelect={handleLabelSelect} />
-          <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-            Prioritize
-          </Button>
+          <div className="flex gap-4">
+            <CreateNoteDialog onNoteCreated={fetchNotes} />
+            <OrganizeMenu onLabelSelect={handleLabelSelect} />
+            <Button 
+              variant="outline" 
+              className={`${isSelectionMode ? "bg-green-500 hover:bg-green-600" : "bg-slate-800 hover:bg-slate-700"} text-white`}
+              onClick={() => setIsSelectionMode(!isSelectionMode)}
+            >
+              {isSelectionMode ? "Finalize" : "Prioritize"}
+            </Button>
+          </div>
         </div>
       </div>
       
       {/* Main Content Area - Note Grid */}
       <div className="px-4">
-        <NoteGrid notes={notes} onDelete={fetchNotes} />
+        <NoteGrid notes={notes} onDelete={fetchNotes} isSelectionMode={isSelectionMode} />
       </div>
     </div>
   );
