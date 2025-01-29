@@ -25,6 +25,7 @@ export default function Home() {
         title,
         description,
         due_date,
+        is_priority,
         label:label_id (
           id,
           name,
@@ -61,6 +62,10 @@ export default function Home() {
 
   const handleLabelSelect = (labelId: string) => {
     setSelectedLabelId(labelId === selectedLabelId ? null : labelId);
+  };
+
+  const handleExitSelectionMode = () => {
+    setIsSelectionMode(false);
   };
 
   return (
@@ -100,7 +105,13 @@ export default function Home() {
       
       {/* Main Content Area - Note Grid */}
       <div className="px-4">
-        <NoteGrid notes={notes} onDelete={fetchNotes} isSelectionMode={isSelectionMode} />
+        <NoteGrid 
+          notes={notes} 
+          onDelete={fetchNotes} 
+          isSelectionMode={isSelectionMode}
+          onExitSelectionMode={handleExitSelectionMode}
+          onPriorityChange={fetchNotes}
+        />
       </div>
     </div>
   );

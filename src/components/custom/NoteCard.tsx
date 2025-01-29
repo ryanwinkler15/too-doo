@@ -7,6 +7,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from "@/hooks/use-toast";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { Note } from "@/lib/types";
+import Image from "next/image";
 
 // Utility function to darken a hex color
 function darkenColor(hex: string, percent: number) {
@@ -41,9 +42,10 @@ interface NoteCardProps {
   label?: Note['label'];
   dueDate?: string;
   onDelete?: () => void;
+  isPriority?: boolean;
 }
 
-export function NoteCard({ id, title, description, className, label, dueDate, onDelete }: NoteCardProps) {
+export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false }: NoteCardProps) {
   const supabase = createClientComponentClient();
   const [isDeleted, setIsDeleted] = useState(false);
   const { toast } = useToast();
@@ -172,22 +174,35 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         } : undefined}
       >
         <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-4 h-full transition-all duration-300 group-hover:-translate-y-10">
+          {/* Priority Icon */}
+          {isPriority && (
+            <div className="absolute top-4 right-5">
+              <Image
+                src="/clock-icon.png"
+                alt="Priority"
+                width={36}
+                height={36}
+                className="opacity-90 brightness-0"
+              />
+            </div>
+          )}
+          
           {/* Label and Due Date Row */}
           <div className="flex items-start gap-2 mb-3">
-          {label && (
-            <div
+            {label && (
+              <div
                 className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
                 style={{ backgroundColor: darkenColor(label.color, 15) }}
-            >
-              {label.name}
-            </div>
-          )}
-          {dueDate && (
+              >
+                {label.name}
+              </div>
+            )}
+            {dueDate && (
               <div className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
                 {format(new Date(dueDate), "MM/dd/yy")}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
 
           <h3 className="text-xl font-semibold text-white mb-2">
             {title}
