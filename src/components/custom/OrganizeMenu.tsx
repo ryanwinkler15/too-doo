@@ -30,6 +30,10 @@ import {
 
 interface OrganizeMenuProps {
   onLabelSelect: (labelId: string) => void;
+  onPriorityFilter: () => void;
+  onDueDateSort: () => void;
+  showPriorityOnly: boolean;
+  sortByDueDate: boolean;
 }
 
 interface Label {
@@ -38,7 +42,13 @@ interface Label {
   color: string;
 }
 
-export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
+export function OrganizeMenu({ 
+  onLabelSelect, 
+  onPriorityFilter, 
+  onDueDateSort,
+  showPriorityOnly,
+  sortByDueDate 
+}: OrganizeMenuProps) {
   const [labels, setLabels] = React.useState<Label[]>([]);
   const [open, setOpen] = React.useState(false)
   const [labelValue, setLabelValue] = React.useState("")
@@ -102,11 +112,31 @@ export function OrganizeMenu({ onLabelSelect }: OrganizeMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 bg-slate-900 text-white border-slate-800">
-        <DropdownMenuItem className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black">
-          Priority
+        <DropdownMenuItem 
+          className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+          onSelect={(event) => {
+            event.preventDefault();
+            onPriorityFilter();
+            setOpen(false);
+          }}
+        >
+          <div className="flex items-center justify-between w-full">
+            Priority
+            {showPriorityOnly && <Check className="h-4 w-4" />}
+          </div>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black">
-          Due Date
+        <DropdownMenuItem 
+          className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+          onSelect={(event) => {
+            event.preventDefault();
+            onDueDateSort();
+            setOpen(false);
+          }}
+        >
+          <div className="flex items-center justify-between w-full">
+            Due Date
+            {sortByDueDate && <Check className="h-4 w-4" />}
+          </div>
         </DropdownMenuItem>
         <Popover open={showLabels} onOpenChange={setShowLabels}>
           <PopoverTrigger asChild>

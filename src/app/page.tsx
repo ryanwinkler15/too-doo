@@ -15,6 +15,8 @@ export default function Home() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [showPriorityOnly, setShowPriorityOnly] = useState(false);
+  const [sortByDueDate, setSortByDueDate] = useState(false);
   const supabase = createClientComponentClient();
 
   const fetchNotes = async () => {
@@ -32,12 +34,23 @@ export default function Home() {
           color
         )
       `)
-      .eq('is_completed', false)
-      .order('created_at', { ascending: false });
+      .eq('is_completed', false);
 
     // Add label filter if selected
     if (selectedLabelId) {
       query = query.eq('label_id', selectedLabelId);
+    }
+
+    // Add priority filter if enabled
+    if (showPriorityOnly) {
+      query = query.eq('is_priority', true);
+    }
+
+    // Sort by due date if enabled, otherwise by created_at
+    if (sortByDueDate) {
+      query = query.order('due_date', { ascending: true, nullsFirst: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
     }
 
     const { data: rawData, error } = await query;
@@ -58,10 +71,18 @@ export default function Home() {
 
   useEffect(() => {
     fetchNotes();
-  }, [selectedLabelId]); // Re-fetch when label filter changes
+  }, [selectedLabelId, showPriorityOnly, sortByDueDate]); // Re-fetch when filters or sort change
 
   const handleLabelSelect = (labelId: string) => {
     setSelectedLabelId(labelId === selectedLabelId ? null : labelId);
+  };
+
+  const handlePriorityFilter = () => {
+    setShowPriorityOnly(!showPriorityOnly);
+  };
+
+  const handleDueDateSort = () => {
+    setSortByDueDate(!sortByDueDate);
   };
 
   const handleExitSelectionMode = () => {
@@ -91,7 +112,13 @@ export default function Home() {
         <div className="space-x-2">
           <div className="flex gap-4">
             <CreateNoteDialog onNoteCreated={fetchNotes} />
-            <OrganizeMenu onLabelSelect={handleLabelSelect} />
+            <OrganizeMenu 
+              onLabelSelect={handleLabelSelect} 
+              onPriorityFilter={handlePriorityFilter}
+              onDueDateSort={handleDueDateSort}
+              showPriorityOnly={showPriorityOnly}
+              sortByDueDate={sortByDueDate}
+            />
             <Button 
               variant="outline" 
               className={`${isSelectionMode ? "bg-green-500 hover:bg-green-600" : "bg-slate-800 hover:bg-slate-700"} text-white`}
