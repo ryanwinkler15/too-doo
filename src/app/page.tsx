@@ -46,11 +46,14 @@ export default function Home() {
       query = query.eq('is_priority', true);
     }
 
-    // Sort by due date if enabled, otherwise by created_at
+    // Sort by due date if enabled
     if (sortByDueDate) {
       query = query.order('due_date', { ascending: true, nullsFirst: false });
     } else {
-      query = query.order('created_at', { ascending: false });
+      // Default sorting: Priority first, then chronological within each group
+      query = query
+        .order('is_priority', { ascending: false }) // Priority notes first
+        .order('due_date', { ascending: true, nullsFirst: false }); // Then by due date
     }
 
     const { data: rawData, error } = await query;
