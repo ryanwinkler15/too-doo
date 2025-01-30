@@ -158,20 +158,20 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
               <div key={group.label.name} className="flex items-center justify-center">
                 {/* Stack container */}
                 <div 
-                  className="relative h-[200px] w-[400px] cursor-pointer"
+                  className="relative h-[200px] w-[400px] cursor-pointer transform-gpu"
                   onClick={() => setExpandedStack(group.label.name)}
                 >
                   {/* Stacked notes - render these FIRST so they appear behind the label card */}
                   {group.notes.slice(0, 5).map((note, index) => {
-                    const xOffset = 9 * (index + 1);  // Right step (20px)
-                    const yOffset = -8 * (index + 1); // Up step (-15px)
+                    const xOffset = `${2 * (index + 1)}%`;  // Use percentage for more consistent scaling
+                    const yOffset = `${-4 * (index + 1)}%`; // Use percentage for more consistent scaling
 
                     return (
                       <motion.div
                         key={note.id}
-                        className="absolute inset-0 w-[400px] h-[200px]"
+                        className="absolute inset-0 w-[400px] h-[200px] origin-center"
                         style={{
-                          transform: `translate(${xOffset}px, ${yOffset}px)`,
+                          transform: `translate(${xOffset}, ${yOffset})`,
                           zIndex: 19 - index,
                         }}
                       >
