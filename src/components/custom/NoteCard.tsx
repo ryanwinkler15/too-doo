@@ -182,7 +182,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                 alt="Priority"
                 width={36}
                 height={36}
-                className="opacity-90 brightness-0"
+                className="opacity-90"
               />
             </div>
           )}

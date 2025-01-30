@@ -413,21 +413,19 @@ export function CreateNoteDialog({
               </Popover>
             </div>
             
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setError("")}
-                className="bg-slate-800 hover:bg-slate-700"
+            <div className="flex justify-end gap-4 mt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange?.(false)}
+                className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
               >
                 Cancel
               </Button>
-              <Button
-                data-submit-button="true"
+              <Button 
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg"
               >
-                {mode === 'create' ? 'Create Note' : 'Update Note'}
+                Create
               </Button>
             </div>
           </form>

@@ -15,7 +15,10 @@ export default function CompletedPage() {
 
   const navItems = [
     { name: 'Active', url: '/' },
-    { name: 'Completed', url: '/completed' }
+    { name: 'Schedule', url: '/schedule' },
+    { name: 'Completed', url: '/completed' },
+    { name: 'Analytics', url: '/analytics' },
+    { name: 'Settings', url: '/settings' }
   ];
 
   const fetchCompletedNotes = async () => {
@@ -55,20 +58,14 @@ export default function CompletedPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
-      {/* Title */}
-      <h1 className="text-4xl font-bold text-center mb-8">Completed Tasks</h1>
-      
-      {/* Header Bar */}
-      <div className="flex justify-between items-center mb-8">
-        {/* Left side - View Toggle */}
-        <div className="space-x-2">
-          <NavBar 
-            items={navItems}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            className="relative"
-          />
-        </div>
+      {/* Top Navigation Bar */}
+      <div className="mb-8">
+        <NavBar 
+          items={navItems}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          className="relative"
+        />
       </div>
       
       {/* Main Content Area - Fanned Note Grid */}

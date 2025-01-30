@@ -33,8 +33,8 @@ export function NavBar({ items, className, activeTab, setActiveTab }: NavBarProp
   }, [])
 
   return (
-    <div className={cn("z-50", className)}>
-      <div className="flex items-center gap-3 bg-[#0A0A0A] border border-[#1A1A1A] backdrop-blur-lg py-1 px-1 rounded-full shadow-lg ring-1 ring-white/20">
+    <div className={cn("z-50 flex justify-center", className)}>
+      <div className="inline-flex items-center gap-3 bg-[#0A0A0A] border border-[#1A1A1A] backdrop-blur-lg py-1 px-1 rounded-full shadow-lg ring-1 ring-white/20">
         {items.map((item) => {
           const isActive = activeTab === item.name
 

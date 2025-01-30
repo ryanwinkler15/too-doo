@@ -24,7 +24,10 @@ export default function Home() {
 
   const navItems = [
     { name: 'Active', url: '/' },
-    { name: 'Completed', url: '/completed' }
+    { name: 'Schedule', url: '/schedule' },
+    { name: 'Completed', url: '/completed' },
+    { name: 'Analytics', url: '/analytics' },
+    { name: 'Settings', url: '/settings' }
   ];
 
   const fetchNotes = async () => {
@@ -108,53 +111,47 @@ export default function Home() {
         onOpenChange={setIsCreating}
       />
       
-      {/* Title */}
-      <h1 className="text-4xl font-bold text-center mb-8">Do it all</h1>
+      {/* Top Navigation Bar */}
+      <div className="mb-8">
+        <NavBar 
+          items={navItems}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          className="relative"
+        />
+      </div>
       
-      {/* Header Bar */}
-      <div className="flex justify-between items-center mb-8">
-        {/* Left side - View Toggle */}
-        <div className="space-x-2">
-          <NavBar 
-            items={navItems}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            className="relative"
+      {/* Action Buttons */}
+      <div className="flex justify-end mb-8">
+        <div className="flex gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsCreating(true)}
+            className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New
+          </Button>
+          <OrganizeMenu 
+            onLabelSelect={handleLabelSelect} 
+            onPriorityFilter={handlePriorityFilter}
+            onDueDateSort={handleDueDateSort}
+            showPriorityOnly={showPriorityOnly}
+            sortByDueDate={sortByDueDate}
           />
-        </div>
-        
-        {/* Right side - Action Buttons */}
-        <div className="space-x-2">
-          <div className="flex gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsCreating(true)}
-              className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New
-            </Button>
-            <OrganizeMenu 
-              onLabelSelect={handleLabelSelect} 
-              onPriorityFilter={handlePriorityFilter}
-              onDueDateSort={handleDueDateSort}
-              showPriorityOnly={showPriorityOnly}
-              sortByDueDate={sortByDueDate}
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => setIsSelectionMode(!isSelectionMode)}
-              className={cn(
-                "bg-[#0A0A0A] border border-[#1A1A1A] rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20",
-                isSelectionMode 
-                  ? "text-white" 
-                  : "text-white hover:text-white"
-              )}
-            >
-              <Star className="w-4 h-4 mr-2" />
-              {isSelectionMode ? "Finalize" : "Prioritize"}
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setIsSelectionMode(!isSelectionMode)}
+            className={cn(
+              "bg-[#0A0A0A] border border-[#1A1A1A] rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20",
+              isSelectionMode 
+                ? "text-white" 
+                : "text-white hover:text-white"
+            )}
+          >
+            <Star className="w-4 h-4 mr-2" />
+            {isSelectionMode ? "Finalize" : "Prioritize"}
+          </Button>
         </div>
       </div>
       
