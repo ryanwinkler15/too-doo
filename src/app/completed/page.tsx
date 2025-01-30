@@ -6,10 +6,17 @@ import { FannedNoteGrid } from "@/components/custom/FannedNoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Note } from "@/lib/types";
 import Link from 'next/link';
+import { NavBar } from "@/components/ui/tubelight-navbar";
 
 export default function CompletedPage() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [activeTab, setActiveTab] = useState("Completed");
   const supabase = createClientComponentClient();
+
+  const navItems = [
+    { name: 'Active', url: '/' },
+    { name: 'Completed', url: '/completed' }
+  ];
 
   const fetchCompletedNotes = async () => {
     const { data: rawData, error } = await supabase
@@ -55,14 +62,12 @@ export default function CompletedPage() {
       <div className="flex justify-between items-center mb-8">
         {/* Left side - View Toggle */}
         <div className="space-x-2">
-          <Link href="/">
-            <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-              Active
-            </Button>
-          </Link>
-          <Button variant="outline" className="bg-blue-600 text-white hover:bg-blue-700">
-            Completed
-          </Button>
+          <NavBar 
+            items={navItems}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            className="relative"
+          />
         </div>
       </div>
       

@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { NoteGrid } from "@/components/custom/NoteGrid";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Plus } from "lucide-react";
+import { Plus, Star, AlignJustify } from "lucide-react";
 import { Note } from "@/lib/types";
 import Link from "next/link";
 import { OrganizeMenu } from "@/components/custom/OrganizeMenu";
+import { NavBar } from "@/components/ui/tubelight-navbar";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -17,7 +19,13 @@ export default function Home() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [showPriorityOnly, setShowPriorityOnly] = useState(false);
   const [sortByDueDate, setSortByDueDate] = useState(false);
+  const [activeTab, setActiveTab] = useState("Active");
   const supabase = createClientComponentClient();
+
+  const navItems = [
+    { name: 'Active', url: '/' },
+    { name: 'Completed', url: '/completed' }
+  ];
 
   const fetchNotes = async () => {
     let query = supabase
@@ -94,6 +102,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
+      <CreateNoteDialog 
+        onNoteCreated={fetchNotes} 
+        isOpen={isCreating}
+        onOpenChange={setIsCreating}
+      />
+      
       {/* Title */}
       <h1 className="text-4xl font-bold text-center mb-8">Do it all</h1>
       
@@ -101,20 +115,25 @@ export default function Home() {
       <div className="flex justify-between items-center mb-8">
         {/* Left side - View Toggle */}
         <div className="space-x-2">
-          <Button variant="outline" className="bg-blue-600 text-white hover:bg-blue-700">
-            Active
-          </Button>
-          <Link href="/completed">
-            <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-              Completed
-            </Button>
-          </Link>
+          <NavBar 
+            items={navItems}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            className="relative"
+          />
         </div>
         
         {/* Right side - Action Buttons */}
         <div className="space-x-2">
           <div className="flex gap-4">
-            <CreateNoteDialog onNoteCreated={fetchNotes} />
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCreating(true)}
+              className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New
+            </Button>
             <OrganizeMenu 
               onLabelSelect={handleLabelSelect} 
               onPriorityFilter={handlePriorityFilter}
@@ -124,9 +143,15 @@ export default function Home() {
             />
             <Button 
               variant="outline" 
-              className={`${isSelectionMode ? "bg-green-500 hover:bg-green-600" : "bg-slate-800 hover:bg-slate-700"} text-white`}
               onClick={() => setIsSelectionMode(!isSelectionMode)}
+              className={cn(
+                "bg-[#0A0A0A] border border-[#1A1A1A] rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20",
+                isSelectionMode 
+                  ? "text-white" 
+                  : "text-white hover:text-white"
+              )}
             >
+              <Star className="w-4 h-4 mr-2" />
               {isSelectionMode ? "Finalize" : "Prioritize"}
             </Button>
           </div>

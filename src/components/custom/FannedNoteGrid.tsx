@@ -163,8 +163,8 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                 >
                   {/* Stacked notes - render these FIRST so they appear behind the label card */}
                   {group.notes.slice(0, 5).map((note, index) => {
-                    const xOffset = 20 * (index + 1);  // Right step (20px)
-                    const yOffset = -15 * (index + 1); // Up step (-15px)
+                    const xOffset = 9 * (index + 1);  // Right step (20px)
+                    const yOffset = -8 * (index + 1); // Up step (-15px)
 
                     return (
                       <motion.div

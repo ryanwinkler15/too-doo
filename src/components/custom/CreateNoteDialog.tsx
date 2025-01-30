@@ -76,7 +76,6 @@ export function CreateNoteDialog({
   isOpen,
   onOpenChange
 }: CreateNoteDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
   const [title, setTitle] = useState(noteToEdit?.title ?? "");
   const [description, setDescription] = useState(noteToEdit?.description ?? "");
   const [date, setDate] = useState<Date | undefined>(
@@ -166,7 +165,7 @@ export function CreateNoteDialog({
         console.log('Note updated');
       }
 
-      setInternalOpen(false);
+      setError("");
       onNoteCreated?.();
     } catch (error) {
       console.error(mode === 'create' ? 'Error creating note:' : 'Error updating note:', error);
@@ -213,13 +212,8 @@ export function CreateNoteDialog({
     }
   };
 
-  // Reset form state when dialog opens
   const handleDialogOpenChange = (open: boolean) => {
-    if (mode === 'create') {
-      setInternalOpen(open);
-    } else {
-      onOpenChange?.(open);
-    }
+    onOpenChange?.(open);
     
     if (open && mode === 'create') {
       // Only reset fields when creating a new note
@@ -230,18 +224,9 @@ export function CreateNoteDialog({
     }
   };
 
-  const actualOpen = mode === 'create' ? internalOpen : isOpen;
-
   return (
     <>
-      <Dialog open={actualOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogTrigger asChild>
-          {mode === 'create' ? (
-            <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
-              New
-            </Button>
-          ) : null}
-        </DialogTrigger>
+      <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="bg-slate-900 text-white border-slate-800">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
@@ -432,7 +417,7 @@ export function CreateNoteDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setInternalOpen(false)}
+                onClick={() => setError("")}
                 className="bg-slate-800 hover:bg-slate-700"
               >
                 Cancel

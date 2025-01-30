@@ -12,7 +12,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, AlignJustify } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
@@ -107,7 +107,11 @@ export function OrganizeMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="bg-slate-800 text-white hover:bg-slate-700">
+        <Button 
+          variant="outline" 
+          className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+        >
+          <AlignJustify className="w-4 h-4 mr-2" />
           Organize
         </Button>
       </DropdownMenuTrigger>
