@@ -153,67 +153,70 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
           </motion.div>
         ) : (
           // Stacked view
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-24 pt-16 max-w-[1800px] mx-auto">
-            {groupedNotes.map((group) => (
-              <div key={group.label.name} className="flex items-center justify-center w-full">
-                {/* Stack container */}
-                <div 
-                  className="relative h-[200px] w-[400px] cursor-pointer transform-gpu mx-auto"
-                  onClick={() => setExpandedStack(group.label.name)}
-                >
-                  {/* Stacked notes - render these FIRST so they appear behind the label card */}
-                  {group.notes.slice(0, 5).map((note, index) => {
-                    const xOffset = `${2.5 * (index + 1)}%`;  // Slightly increased offset
-                    const yOffset = `${-4 * (index + 1)}%`;
-
-                    return (
-                      <motion.div
-                        key={note.id}
-                        className="absolute inset-0 w-[400px] h-[200px] origin-center"
-                        style={{
-                          transform: `translate(${xOffset}, ${yOffset})`,
-                          zIndex: 19 - index,
-                        }}
-                      >
-                        <div className="h-full w-full border border-slate-600/50 rounded-xl shadow-md">
-                          <NoteCard
-                            id={note.id}
-                            title={note.title}
-                            description={note.description}
-                            label={note.label}
-                            dueDate={note.due_date}
-                            onDelete={onDelete}
-                          />
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-
-                  {/* Label card at the front */}
-                  <motion.div
-                    className={cn(
-                      "absolute inset-0 rounded-xl p-6 flex items-center justify-center",
-                      "border border-slate-700",
-                      group.label.color ? "" : "bg-slate-800"
-                    )}
-                    style={{
-                      backgroundColor: group.label.color || undefined,
-                      borderColor: group.label.color || undefined,
-                      zIndex: 20
-                    }}
+          <div className="container mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24 pt-16">
+              {groupedNotes.map((group) => (
+                <div key={group.label.name} className="flex items-center justify-center">
+                  {/* Stack container with explicit width constraints */}
+                  <div 
+                    className="relative h-[200px] w-[400px] max-w-full cursor-pointer transform-gpu"
+                    onClick={() => setExpandedStack(group.label.name)}
                   >
-                    <h2 className="text-2xl font-bold text-white">
-                      {group.label.name}
-                      {group.notes.length > 0 && (
-                        <span className="ml-2 text-sm opacity-70">
-                          ({group.notes.length})
-                        </span>
+                    {/* Stacked notes */}
+                    {group.notes.slice(0, 5).map((note, index) => {
+                      // More dramatic offsets for better visibility
+                      const xOffset = `${3 * (index + 1)}%`;
+                      const yOffset = `${-5 * (index + 1)}%`;
+
+                      return (
+                        <motion.div
+                          key={note.id}
+                          className="absolute inset-0 w-[400px] max-w-full h-[200px] origin-center"
+                          style={{
+                            transform: `translate(${xOffset}, ${yOffset})`,
+                            zIndex: 19 - index,
+                          }}
+                        >
+                          <div className="h-full w-full border border-slate-600/50 rounded-xl shadow-md">
+                            <NoteCard
+                              id={note.id}
+                              title={note.title}
+                              description={note.description}
+                              label={note.label}
+                              dueDate={note.due_date}
+                              onDelete={onDelete}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+
+                    {/* Label card at the front */}
+                    <motion.div
+                      className={cn(
+                        "absolute inset-0 rounded-xl p-6 flex items-center justify-center",
+                        "border border-slate-700",
+                        group.label.color ? "" : "bg-slate-800"
                       )}
-                    </h2>
-                  </motion.div>
+                      style={{
+                        backgroundColor: group.label.color || undefined,
+                        borderColor: group.label.color || undefined,
+                        zIndex: 20
+                      }}
+                    >
+                      <h2 className="text-2xl font-bold text-white">
+                        {group.label.name}
+                        {group.notes.length > 0 && (
+                          <span className="ml-2 text-sm opacity-70">
+                            ({group.notes.length})
+                          </span>
+                        )}
+                      </h2>
+                    </motion.div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </AnimatePresence>
