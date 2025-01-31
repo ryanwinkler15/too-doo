@@ -76,20 +76,35 @@ export function CreateNoteDialog({
   isOpen,
   onOpenChange
 }: CreateNoteDialogProps) {
-  const [title, setTitle] = useState(noteToEdit?.title ?? "");
-  const [description, setDescription] = useState(noteToEdit?.description ?? "");
-  const [date, setDate] = useState<Date | undefined>(
-    noteToEdit?.due_date ? new Date(noteToEdit.due_date) : undefined
-  );
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
   const [newLabelTitle, setNewLabelTitle] = useState("");
   const [selectedColor, setSelectedColor] = useState(colors[0].value);
   const [savedLabels, setSavedLabels] = useState<SavedLabel[]>([]);
   const [labelPopoverOpen, setLabelPopoverOpen] = useState(false);
-  const [selectedLabelId, setSelectedLabelId] = useState(noteToEdit?.label_id || "");
+  const [selectedLabelId, setSelectedLabelId] = useState("");
   const [error, setError] = useState("");
   
   const supabase = createClientComponentClient();
+
+  // Effect to handle form state based on mode and dialog open state
+  useEffect(() => {
+    if (mode === 'edit' && noteToEdit && isOpen) {
+      // In edit mode, load the note data
+      setTitle(noteToEdit.title);
+      setDescription(noteToEdit.description);
+      setDate(noteToEdit.due_date ? new Date(noteToEdit.due_date) : undefined);
+      setSelectedLabelId(noteToEdit.label_id || "");
+    } else if (mode === 'create' && isOpen) {
+      // In create mode, reset all fields
+      setTitle("");
+      setDescription("");
+      setDate(undefined);
+      setSelectedLabelId("");
+    }
+  }, [mode, noteToEdit, isOpen]);
 
   // Single effect to handle both label loading and form initialization
   useEffect(() => {
@@ -114,13 +129,6 @@ export function CreateNoteDialog({
             setSelectedLabelId(matchingLabel.id);
           }
         }
-      }
-
-      // Initialize form data in edit mode
-      if (mode === 'edit' && noteToEdit && isOpen) {
-        setTitle(noteToEdit.title);
-        setDescription(noteToEdit.description);
-        setDate(noteToEdit.due_date ? new Date(noteToEdit.due_date) : undefined);
       }
     }
 
@@ -167,6 +175,7 @@ export function CreateNoteDialog({
 
       setError("");
       onNoteCreated?.();
+      onOpenChange?.(false);
     } catch (error) {
       console.error(mode === 'create' ? 'Error creating note:' : 'Error updating note:', error);
       setError(`Failed to ${mode === 'create' ? 'create' : 'update'} note. Please try again.`);
@@ -215,8 +224,8 @@ export function CreateNoteDialog({
   const handleDialogOpenChange = (open: boolean) => {
     onOpenChange?.(open);
     
-    if (open && mode === 'create') {
-      // Only reset fields when creating a new note
+    // Reset fields when opening in create mode, or when closing in create mode
+    if (mode === 'create' && (!open || isOpen === false)) {
       setTitle("");
       setDescription("");
       setDate(undefined);
@@ -227,7 +236,7 @@ export function CreateNoteDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="bg-[#0A0A0A] text-white border-[#1A1A1A]">
+        <DialogContent className="bg-[#0A0A0A] text-white border border-[#1A1A1A] ring-1 ring-white/20 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               {mode === 'create' ? 'Create New Note' : 'Edit Note'}
@@ -253,7 +262,7 @@ export function CreateNoteDialog({
                 value={description}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
                 placeholder="Enter description (optional)"
-                className="bg-[#111111] border-[#1A1A1A]"
+                className="bg-[#111111] border-[#1A1A1A] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/40 [&::-webkit-scrollbar-track]:bg-transparent"
               />
             </div>
             
@@ -434,7 +443,7 @@ export function CreateNoteDialog({
       </Dialog>
 
       <Dialog open={labelDialogOpen} onOpenChange={setLabelDialogOpen}>
-        <DialogContent className="bg-[#0A0A0A] text-white border-[#1A1A1A]">
+        <DialogContent className="bg-[#0A0A0A] text-white border border-[#1A1A1A] ring-1 ring-white/20 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">New Label</DialogTitle>
           </DialogHeader>

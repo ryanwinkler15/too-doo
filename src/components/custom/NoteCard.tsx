@@ -188,28 +188,30 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           )}
           
           {/* Label and Due Date Row */}
-          <div className="flex items-start gap-2 mb-3">
+          <div className="flex items-start gap-2 mb-1">
             {label && (
               <div
-                className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium text-white border border-white/30"
+                className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium text-white border border-white/30"
                 style={{ backgroundColor: darkenColor(label.color, 15) }}
               >
                 {label.name}
               </div>
             )}
             {dueDate && (
-              <div className="inline-flex h-8 items-center px-3 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
+              <div className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
                 {format(new Date(dueDate), "MM/dd/yy")}
               </div>
             )}
           </div>
 
-          <h3 className="text-xl font-semibold text-white mb-2">
+          <h3 className="text-xl font-semibold text-white mb-1">
             {title}
           </h3>
-          <p className="text-white text-opacity-90 line-clamp-3">
-            {description}
-          </p>
+          <div className="relative flex-grow overflow-hidden pointer-events-auto">
+            <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+              {description}
+            </p>
+          </div>
         </div>
 
         <div
