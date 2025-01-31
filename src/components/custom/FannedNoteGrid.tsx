@@ -153,18 +153,18 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
           </motion.div>
         ) : (
           // Stacked view
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-24 pt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-24 pt-16 max-w-[1800px] mx-auto">
             {groupedNotes.map((group) => (
-              <div key={group.label.name} className="flex items-center justify-center">
+              <div key={group.label.name} className="flex items-center justify-center w-full">
                 {/* Stack container */}
                 <div 
-                  className="relative h-[200px] w-[400px] cursor-pointer transform-gpu"
+                  className="relative h-[200px] w-[400px] cursor-pointer transform-gpu mx-auto"
                   onClick={() => setExpandedStack(group.label.name)}
                 >
                   {/* Stacked notes - render these FIRST so they appear behind the label card */}
                   {group.notes.slice(0, 5).map((note, index) => {
-                    const xOffset = `${2 * (index + 1)}%`;  // Use percentage for more consistent scaling
-                    const yOffset = `${-4 * (index + 1)}%`; // Use percentage for more consistent scaling
+                    const xOffset = `${2.5 * (index + 1)}%`;  // Slightly increased offset
+                    const yOffset = `${-4 * (index + 1)}%`;
 
                     return (
                       <motion.div
