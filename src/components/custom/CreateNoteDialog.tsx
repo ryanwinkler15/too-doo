@@ -227,7 +227,7 @@ export function CreateNoteDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-[#0A0A0A] text-white border-[#1A1A1A]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               {mode === 'create' ? 'Create New Note' : 'Edit Note'}
@@ -242,7 +242,7 @@ export function CreateNoteDialog({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter title"
                 required
-                className="bg-slate-800 border-slate-700"
+                className="bg-[#111111] border-[#1A1A1A]"
               />
             </div>
             
@@ -253,7 +253,7 @@ export function CreateNoteDialog({
                 value={description}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
                 placeholder="Enter description (optional)"
-                className="bg-slate-800 border-slate-700"
+                className="bg-[#111111] border-[#1A1A1A]"
               />
             </div>
             
@@ -266,7 +266,7 @@ export function CreateNoteDialog({
                       variant="outline"
                       role="combobox"
                       aria-expanded={labelPopoverOpen}
-                      className="w-[200px] justify-between bg-slate-800 border-slate-700 text-left font-normal"
+                      className="w-[200px] justify-between bg-[#111111] border-[#1A1A1A] text-left font-normal"
                       tabIndex={0}
                       onClick={() => setLabelPopoverOpen(true)}
                       onFocus={(e) => {
@@ -365,7 +365,7 @@ export function CreateNoteDialog({
                   <Button
                     data-calendar-button="true"
                     variant="outline"
-                    className={`w-full justify-start text-left font-normal bg-slate-800 border-slate-700 ${!date && "text-slate-400"}`}
+                    className={`w-full justify-start text-left font-normal bg-[#111111] border-[#1A1A1A] ${!date && "text-slate-400"}`}
                     tabIndex={0}
                     onClick={() => {
                       // Add a small delay to ensure the calendar is mounted before focusing
@@ -387,7 +387,7 @@ export function CreateNoteDialog({
                     {date ? format(date, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-800">
+                <PopoverContent className="w-auto p-0 bg-[#0A0A0A] border-[#1A1A1A]">
                   <Calendar
                     mode="single"
                     selected={date}
@@ -395,8 +395,7 @@ export function CreateNoteDialog({
                       setDate(date);
                       const calendarButton = document.querySelector('[data-calendar-button="true"]');
                       if (calendarButton instanceof HTMLElement) {
-                        calendarButton.click(); // Close the popover
-                        // Focus the create/update button after a short delay to ensure the popover is closed
+                        calendarButton.click();
                         setTimeout(() => {
                           const submitButton = document.querySelector('[data-submit-button="true"]');
                           if (submitButton instanceof HTMLElement) {
@@ -407,7 +406,7 @@ export function CreateNoteDialog({
                     }}
                     defaultMonth={date || new Date()}
                     initialFocus
-                    className="bg-slate-900"
+                    className="bg-[#0A0A0A]"
                   />
                 </PopoverContent>
               </Popover>
@@ -417,15 +416,17 @@ export function CreateNoteDialog({
               <Button 
                 variant="outline" 
                 onClick={() => onOpenChange?.(false)}
-                className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+                className="bg-slate-900 hover:bg-slate-800 text-white border-slate-800"
+                data-cancel-button="true"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg"
+                className="bg-slate-800 hover:bg-slate-700 text-white"
+                data-submit-button="true"
               >
-                Create
+                {mode === 'create' ? 'Create' : 'Update'}
               </Button>
             </div>
           </form>
@@ -433,7 +434,7 @@ export function CreateNoteDialog({
       </Dialog>
 
       <Dialog open={labelDialogOpen} onOpenChange={setLabelDialogOpen}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-[#0A0A0A] text-white border-[#1A1A1A]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">New Label</DialogTitle>
           </DialogHeader>
@@ -446,7 +447,7 @@ export function CreateNoteDialog({
                 onChange={(e) => setNewLabelTitle(e.target.value)}
                 placeholder="Enter label title"
                 required
-                className="bg-slate-800 border-slate-700"
+                className="bg-[#111111] border-[#1A1A1A]"
               />
             </div>
             
@@ -472,13 +473,13 @@ export function CreateNoteDialog({
                 type="button"
                 variant="outline"
                 onClick={() => setLabelDialogOpen(false)}
-                className="bg-slate-800 hover:bg-slate-700"
+                className="bg-slate-900 hover:bg-slate-800 text-white border-slate-800"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-slate-800 hover:bg-slate-700 text-white"
               >
                 Create Label
               </Button>

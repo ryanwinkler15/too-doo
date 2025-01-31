@@ -115,9 +115,9 @@ export function OrganizeMenu({
           Organize
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-slate-900 text-white border-slate-800">
+      <DropdownMenuContent className="w-56 bg-[#0A0A0A] text-white border-[#1A1A1A]">
         <DropdownMenuItem 
-          className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+          className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
           onSelect={(event) => {
             event.preventDefault();
             onPriorityFilter();
@@ -130,7 +130,7 @@ export function OrganizeMenu({
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
-          className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+          className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
           onSelect={(event) => {
             event.preventDefault();
             onDueDateSort();
@@ -145,7 +145,7 @@ export function OrganizeMenu({
         <Popover open={showLabels} onOpenChange={setShowLabels}>
           <PopoverTrigger asChild>
             <DropdownMenuItem 
-              className="text-white hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+              className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
               onSelect={(event) => {
                 event.preventDefault()
                 setShowLabels(true)
@@ -156,7 +156,7 @@ export function OrganizeMenu({
             </DropdownMenuItem>
           </PopoverTrigger>
           <PopoverContent 
-            className="p-0 bg-slate-900 border-slate-800 w-56" 
+            className="p-0 bg-[#0A0A0A] border-[#1A1A1A] w-56" 
             align="start"
             alignOffset={-5}
             sideOffset={0}
@@ -170,14 +170,14 @@ export function OrganizeMenu({
               e.preventDefault();
             }}
           >
-            <Command className="bg-slate-900">
+            <Command className="bg-[#0A0A0A]">
               <CommandInput 
                 ref={inputRef}
                 placeholder="Search labels..." 
                 value={searchValue}
                 onValueChange={setSearchValue}
                 onKeyDown={handleKeyDown}
-                className="text-white placeholder:text-slate-400 border-slate-800"
+                className="text-white placeholder:text-slate-400 bg-[#111111] border-[#1A1A1A]"
               />
               <CommandEmpty className="text-white">No label found.</CommandEmpty>
               <CommandGroup>
@@ -191,7 +191,7 @@ export function OrganizeMenu({
                       setShowLabels(false)
                       setOpen(false)
                     }}
-                    className="text-white aria-selected:bg-slate-200 aria-selected:text-black hover:bg-slate-200 hover:text-black focus:bg-slate-200 focus:text-black"
+                    className="text-white aria-selected:bg-[#111111] aria-selected:text-white hover:bg-[#111111] hover:text-white focus:bg-[#111111] focus:text-white"
                   >
                     <Check
                       className={cn(
