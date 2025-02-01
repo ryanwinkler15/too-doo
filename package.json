@@ -20,6 +20,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.1",
+    "bufferutil": "^4.0.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
@@ -33,6 +34,7 @@
     "react-hook-form": "^7.54.2",
     "sonner": "^1.7.2",
     "tailwind-merge": "^2.6.0",
+    "utf-8-validate": "^6.0.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

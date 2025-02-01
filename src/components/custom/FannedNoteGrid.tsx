@@ -44,18 +44,25 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
   // Fetch labels from Supabase
   useEffect(() => {
     const fetchLabels = async () => {
-      const { data, error } = await supabase
-        .from('labels')
-        .select('*')
-        .order('name');
-      
-      if (error) {
+      try {
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) throw new Error('No user found');
+
+        const { data, error } = await supabase
+          .from('labels')
+          .select('*')
+          .eq('user_id', user.id) // Only fetch user's labels
+          .order('name');
+        
+        if (error) throw error;
+        
+        if (data) {
+          setLabels(data);
+        }
+      } catch (error) {
         console.error('Error fetching labels:', error);
-        return;
-      }
-      
-      if (data) {
-        setLabels(data);
       }
     };
 

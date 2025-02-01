@@ -31,55 +31,62 @@ export default function Home() {
   ];
 
   const fetchNotes = async () => {
-    let query = supabase
-      .from('notes')
-      .select(`
-        id,
-        title,
-        description,
-        due_date,
-        is_priority,
-        label:label_id (
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
+      let query = supabase
+        .from('notes')
+        .select(`
           id,
-          name,
-          color
-        )
-      `)
-      .eq('is_completed', false);
+          title,
+          description,
+          due_date,
+          is_priority,
+          label:label_id (
+            id,
+            name,
+            color
+          )
+        `)
+        .eq('is_completed', false)
+        .eq('user_id', user.id); // Only fetch user's notes
 
-    // Add label filter if selected
-    if (selectedLabelId) {
-      query = query.eq('label_id', selectedLabelId);
-    }
+      // Add label filter if selected
+      if (selectedLabelId) {
+        query = query.eq('label_id', selectedLabelId);
+      }
 
-    // Add priority filter if enabled
-    if (showPriorityOnly) {
-      query = query.eq('is_priority', true);
-    }
+      // Add priority filter if enabled
+      if (showPriorityOnly) {
+        query = query.eq('is_priority', true);
+      }
 
-    // Sort by due date if enabled
-    if (sortByDueDate) {
-      query = query.order('due_date', { ascending: true, nullsFirst: false });
-    } else {
-      // Default sorting: Priority first, then chronological within each group
-      query = query
-        .order('is_priority', { ascending: false }) // Priority notes first
-        .order('due_date', { ascending: true, nullsFirst: false }); // Then by due date
-    }
+      // Sort by due date if enabled
+      if (sortByDueDate) {
+        query = query.order('due_date', { ascending: true, nullsFirst: false });
+      } else {
+        // Default sorting: Priority first, then chronological within each group
+        query = query
+          .order('is_priority', { ascending: false }) // Priority notes first
+          .order('due_date', { ascending: true, nullsFirst: false }); // Then by due date
+      }
 
-    const { data: rawData, error } = await query;
+      const { data: rawData, error } = await query;
 
-    if (error) {
+      if (error) throw error;
+
+      if (rawData) {
+        const transformedData = rawData.map(note => ({
+          ...note,
+          label: Array.isArray(note.label) ? note.label[0] : note.label
+        }));
+        setNotes(transformedData);
+      }
+    } catch (error) {
       console.error('Error fetching notes:', error);
-      return;
-    }
-
-    if (rawData) {
-      const transformedData = rawData.map(note => ({
-        ...note,
-        label: Array.isArray(note.label) ? note.label[0] : note.label
-      }));
-      setNotes(transformedData);
     }
   };
 

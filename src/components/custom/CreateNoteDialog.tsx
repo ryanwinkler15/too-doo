@@ -109,26 +109,33 @@ export function CreateNoteDialog({
   // Single effect to handle both label loading and form initialization
   useEffect(() => {
     async function initialize() {
-      // Load labels
-      const { data: labels, error } = await supabase
-        .from('labels')
-        .select('*')
-        .order('name');
-      
-      if (error) {
-        console.error('Error loading labels:', error);
-        return;
-      }
+      try {
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) throw new Error('No user found');
 
-      if (labels) {
-        setSavedLabels(labels);
-        // If we're in edit mode and have a label_id, find and select that label
-        if (mode === 'edit' && noteToEdit?.label_id) {
-          const matchingLabel = labels.find(label => label.id === noteToEdit.label_id);
-          if (matchingLabel) {
-            setSelectedLabelId(matchingLabel.id);
+        // Load labels
+        const { data: labels, error } = await supabase
+          .from('labels')
+          .select('*')
+          .eq('user_id', user.id) // Only fetch user's labels
+          .order('name');
+        
+        if (error) throw error;
+
+        if (labels) {
+          setSavedLabels(labels);
+          // If we're in edit mode and have a label_id, find and select that label
+          if (mode === 'edit' && noteToEdit?.label_id) {
+            const matchingLabel = labels.find(label => label.id === noteToEdit.label_id);
+            if (matchingLabel) {
+              setSelectedLabelId(matchingLabel.id);
+            }
           }
         }
+      } catch (error) {
+        console.error('Error loading labels:', error);
       }
     }
 
@@ -140,6 +147,11 @@ export function CreateNoteDialog({
     console.log(mode === 'create' ? 'Creating note:' : 'Updating note:', { title, description, label: selectedLabelId, date });
 
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
       if (mode === 'create') {
         const { data: newNote, error } = await supabase
           .from('notes')
@@ -149,6 +161,7 @@ export function CreateNoteDialog({
               description,
               label_id: selectedLabelId || null,
               due_date: date?.toISOString() || null,
+              user_id: user.id
             }
           ])
           .select()
@@ -166,7 +179,8 @@ export function CreateNoteDialog({
             label_id: selectedLabelId || null,
             due_date: date?.toISOString() || null,
           })
-          .eq('id', noteToEdit?.id);
+          .eq('id', noteToEdit?.id)
+          .eq('user_id', user.id);
 
         if (error) throw error;
 
@@ -187,12 +201,18 @@ export function CreateNoteDialog({
     setError("");
 
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
       const { data: newLabel, error } = await supabase
         .from('labels')
         .insert([
           {
             name: newLabelTitle,
             color: selectedColor,
+            user_id: user.id
           }
         ])
         .select()

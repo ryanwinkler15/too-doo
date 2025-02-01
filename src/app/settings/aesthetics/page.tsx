@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { LayoutDashboard, UserCog, Settings, LogOut, Palette, CreditCard } from "lucide-react";
+import { UserCog, LogOut, Palette, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 
-export default function SettingsPage() {
+export default function AestheticsPage() {
   const [activeTab, setActiveTab] = useState("Settings");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -103,7 +103,13 @@ export default function SettingsPage() {
             </div>
           </SidebarBody>
         </Sidebar>
-        <SettingsContent />
+
+        {/* Aesthetics Content */}
+        <div className="flex flex-1">
+          <div className="p-6 md:p-10 border-l border-[#1A1A1A] bg-[#0A0A0A] flex flex-col gap-2 flex-1 w-full h-full">
+            <h1 className="text-2xl font-bold mb-6">Aesthetics</h1>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -123,49 +129,6 @@ const Logo = () => {
       >
         Too-Doo
       </motion.span>
-    </Link>
-  );
-};
-
-const SettingsContent = () => {
-  return (
-    <div className="flex flex-1">
-      <div className="p-6 md:p-10 border-l border-[#1A1A1A] bg-[#0A0A0A] flex flex-col gap-2 flex-1 w-full h-full">
-        <h1 className="text-2xl font-bold mb-6">Settings</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <SettingsCard
-            title="Profile Settings"
-            description="Manage your account details and preferences"
-            href="/settings/profile"
-          />
-          <SettingsCard
-            title="Appearance"
-            description="Customize the look and feel of your dashboard"
-            href="/settings/appearance"
-          />
-          <SettingsCard
-            title="Notifications"
-            description="Configure your notification preferences"
-            href="/settings/notifications"
-          />
-          <SettingsCard
-            title="Privacy"
-            description="Manage your privacy and security settings"
-            href="/settings/privacy"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const SettingsCard = ({ title, description, href }: { title: string; description: string; href: string }) => {
-  return (
-    <Link href={href}>
-      <div className="p-6 rounded-xl border border-[#1A1A1A] bg-[#111111] hover:bg-[#1A1A1A] transition-colors cursor-pointer">
-        <h2 className="text-lg font-semibold mb-2">{title}</h2>
-        <p className="text-sm text-gray-400">{description}</p>
-      </div>
     </Link>
   );
 }; 
