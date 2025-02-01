@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { toast } from "sonner";
 
 const colors = [
   { value: '#CB9DF0', label: 'Purple' },
@@ -86,6 +87,7 @@ export function CreateNoteDialog({
   const [labelPopoverOpen, setLabelPopoverOpen] = useState(false);
   const [selectedLabelId, setSelectedLabelId] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const supabase = createClientComponentClient();
 
@@ -144,32 +146,60 @@ export function CreateNoteDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(mode === 'create' ? 'Creating note:' : 'Updating note:', { title, description, label: selectedLabelId, date });
+    setIsSubmitting(true);
+    console.log('Submit button clicked');
 
     try {
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error('No user found');
+      // Get the session instead of user
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        toast.error('Authentication error. Please try signing in again.');
+        return;
+      }
+
+      if (!session) {
+        console.error('No active session found');
+        toast.error('Please sign in to create notes');
+        return;
+      }
+
+      console.log('Current session:', session);
 
       if (mode === 'create') {
-        const { data: newNote, error } = await supabase
+        const noteData = {
+          title,
+          description,
+          label_id: selectedLabelId || null,
+          due_date: date?.toISOString() || null,
+          user_id: session.user.id  // Use session.user.id instead of user.id
+        };
+        
+        console.log('Creating note with data:', noteData);
+
+        const { data: newNote, error: insertError } = await supabase
           .from('notes')
-          .insert([
-            {
-              title,
-              description,
-              label_id: selectedLabelId || null,
-              due_date: date?.toISOString() || null,
-              user_id: user.id
-            }
-          ])
+          .insert([noteData])
           .select()
           .single();
 
-        if (error) throw error;
+        if (insertError) {
+          console.error('Error creating note:', insertError);
+          toast.error(insertError.message);
+          return;
+        }
 
-        console.log('Note created:', newNote);
+        console.log('Note created successfully:', newNote);
+        toast.success('Note created!');
+        
+        // Clear form and close dialog
+        setTitle("");
+        setDescription("");
+        setDate(undefined);
+        setSelectedLabelId("");
+        onNoteCreated?.();
+        onOpenChange?.(false);
       } else {
         const { error } = await supabase
           .from('notes')
@@ -180,7 +210,7 @@ export function CreateNoteDialog({
             due_date: date?.toISOString() || null,
           })
           .eq('id', noteToEdit?.id)
-          .eq('user_id', user.id);
+          .eq('user_id', session.user.id);
 
         if (error) throw error;
 
@@ -188,11 +218,12 @@ export function CreateNoteDialog({
       }
 
       setError("");
-      onNoteCreated?.();
-      onOpenChange?.(false);
     } catch (error) {
-      console.error(mode === 'create' ? 'Error creating note:' : 'Error updating note:', error);
+      console.error('Unexpected error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
       setError(`Failed to ${mode === 'create' ? 'create' : 'update'} note. Please try again.`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -454,8 +485,9 @@ export function CreateNoteDialog({
                 type="submit"
                 className="bg-slate-800 hover:bg-slate-700 text-white"
                 data-submit-button="true"
+                disabled={isSubmitting || !title}
               >
-                {mode === 'create' ? 'Create' : 'Update'}
+                {isSubmitting ? 'Creating...' : mode === 'create' ? 'Create Note' : 'Update Note'}
               </Button>
             </div>
           </form>
