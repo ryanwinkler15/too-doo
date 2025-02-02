@@ -9,12 +9,12 @@ CREATE TABLE notes (
   completed_at TIMESTAMPTZ,
   is_priority BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID NOT NULL
 );
 
 CREATE TABLE labels (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   color TEXT NOT NULL,
-  user_id UUID REFERENCES auth.users(id)
+  user_id UUID NOT NULL
 );

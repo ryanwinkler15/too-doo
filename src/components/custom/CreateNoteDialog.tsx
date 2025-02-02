@@ -173,8 +173,15 @@ export function CreateNoteDialog({
           description,
           label_id: selectedLabelId || null,
           due_date: date?.toISOString() || null,
-          user_id: session.user.id  // Use session.user.id instead of user.id
+          user_id: session.user.id
         };
+        
+        // Add debug logging
+        console.log('Debug - Session:', {
+          sessionId: session.access_token,
+          userId: session.user.id,
+          noteUserId: noteData.user_id
+        });
         
         console.log('Creating note with data:', noteData);
 
