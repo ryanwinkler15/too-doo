@@ -11,6 +11,9 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Redirect to the home page with the full URL
-  return NextResponse.redirect('https://too-doo-grodt.vercel.app/');
+  // Get the origin from the request URL for dynamic redirect
+  const origin = requestUrl.origin;
+  
+  // Redirect to the home page using the origin
+  return NextResponse.redirect(`${origin}/`);
 } 

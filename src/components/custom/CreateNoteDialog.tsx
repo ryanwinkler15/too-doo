@@ -208,6 +208,7 @@ export function CreateNoteDialog({
         onNoteCreated?.();
         onOpenChange?.(false);
       } else {
+        // Update note
         const { error } = await supabase
           .from('notes')
           .update({
@@ -222,6 +223,15 @@ export function CreateNoteDialog({
         if (error) throw error;
 
         console.log('Note updated');
+        toast.success('Note updated!');
+        
+        // Clear form and close dialog
+        setTitle("");
+        setDescription("");
+        setDate(undefined);
+        setSelectedLabelId("");
+        onNoteCreated?.();
+        onOpenChange?.(false);
       }
 
       setError("");

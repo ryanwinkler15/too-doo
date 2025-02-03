@@ -31,17 +31,17 @@ export default function AestheticsPage() {
 
   const sidebarLinks = [
     {
-      label: "Aesthetics",
-      href: "/settings/aesthetics",
-      icon: (
-        <Palette className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
       label: "Profile",
       href: "/settings/profile",
       icon: (
         <UserCog className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Aesthetics",
+      href: "/settings/aesthetics",
+      icon: (
+        <Palette className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
@@ -62,9 +62,9 @@ export default function AestheticsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Top Navigation Bar */}
-      <div className="px-4 pb-4">
+    <div className="min-h-screen bg-slate-950 text-white">
+      {/* Top Navigation Bar - Now positioned absolutely */}
+      <div className="absolute top-0 left-0 right-0 p-4 pb-0 z-10">
         <NavBar 
           items={navItems}
           activeTab={activeTab}
@@ -73,40 +73,40 @@ export default function AestheticsPage() {
         />
       </div>
 
-      {/* Settings Content */}
-      <div className={cn(
-        "flex flex-col md:flex-row bg-[#111111] w-full border-t border-[#1A1A1A] overflow-hidden",
-        "h-[calc(100vh-80px)]" // Adjusted to account for the nav bar and its padding
-      )}>
-        <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
-          <SidebarBody className="justify-between gap-10">
-            <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-              <Logo />
-              <div className="mt-8 flex flex-col gap-2">
-                {sidebarLinks.map((link, idx) => (
-                  <SidebarLink key={idx} link={link} />
-                ))}
+      <div className="flex h-screen pt-[72px]"> {/* Add padding-top to account for the nav bar */}
+        {/* Sidebar */}
+        <div className="w-[300px] flex-shrink-0">
+          <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
+            <SidebarBody className="justify-between gap-10">
+              <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+                <Logo />
+                <div className="mt-8 flex flex-col gap-2">
+                  {sidebarLinks.map((link, idx) => (
+                    <SidebarLink key={idx} link={link} />
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <SidebarLink
-                link={{
-                  label: "User Profile",
-                  href: "/settings/profile",
-                  icon: (
-                    <div className="w-7 h-7 rounded-full bg-[#1A1A1A] flex items-center justify-center">
-                      <UserCog className="h-4 w-4 text-white" />
-                    </div>
-                  ),
-                }}
-              />
-            </div>
-          </SidebarBody>
-        </Sidebar>
+              <div>
+                <SidebarLink
+                  link={{
+                    label: "User Profile",
+                    href: "/settings/profile",
+                    icon: (
+                      <div className="w-7 h-7 rounded-full bg-slate-900 flex items-center justify-center">
+                        <UserCog className="h-4 w-4 text-white" />
+                      </div>
+                    ),
+                  }}
+                />
+              </div>
+            </SidebarBody>
+          </Sidebar>
+        </div>
 
-        {/* Aesthetics Content */}
-        <div className="flex flex-1">
-          <div className="p-6 md:p-10 border-l border-[#1A1A1A] bg-[#0A0A0A] flex flex-col gap-2 flex-1 w-full h-full">
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Aesthetics Content */}
+          <div className="flex-1 p-6 md:p-10 border-l border-slate-900">
             <h1 className="text-2xl font-bold mb-6">Aesthetics</h1>
           </div>
         </div>

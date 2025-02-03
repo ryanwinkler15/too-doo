@@ -280,11 +280,17 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           } : undefined
         }}
         onNoteCreated={() => {
-          onDelete?.();
+          console.log('Note updated, refreshing...');
+          onDelete?.(); // This will trigger a refresh of the notes list
           setIsEditing(false);
         }}
         isOpen={isEditing}
-        onOpenChange={setIsEditing}
+        onOpenChange={(open) => {
+          setIsEditing(open);
+          if (!open) {
+            onDelete?.(); // Refresh when dialog is closed
+          }
+        }}
       />
     </>
   );
