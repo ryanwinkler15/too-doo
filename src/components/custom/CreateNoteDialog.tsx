@@ -88,6 +88,9 @@ export function CreateNoteDialog({
   const [selectedLabelId, setSelectedLabelId] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableColors, setAvailableColors] = useState<Array<{ value: string; label: string; }>>([]);
+  const [isCustomColorDialogOpen, setIsCustomColorDialogOpen] = useState(false);
+  const [customColorInput, setCustomColorInput] = useState("");
   
   const supabase = createClientComponentClient();
 
@@ -143,6 +146,27 @@ export function CreateNoteDialog({
 
     initialize();
   }, [mode, noteToEdit, isOpen, supabase]);
+
+  // Add this effect after the initialize effect
+  useEffect(() => {
+    // Start with preset colors
+    const allColors = new Set(colors.map(c => c.value));
+    
+    // Add unique colors from existing labels
+    savedLabels.forEach(label => {
+      if (!allColors.has(label.color)) {
+        allColors.add(label.color);
+      }
+    });
+
+    // Convert to array of objects matching the color format
+    const colorArray = Array.from(allColors).map(color => ({
+      value: color,
+      label: colors.find(c => c.value === color)?.label || 'Custom'
+    }));
+
+    setAvailableColors(colorArray);
+  }, [savedLabels]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -531,8 +555,8 @@ export function CreateNoteDialog({
             
             <div className="space-y-2">
               <Label>Color</Label>
-              <div className="flex gap-3">
-                {colors.map((color) => (
+              <div className="flex gap-3 flex-wrap">
+                {availableColors.map((color) => (
                   <div
                     key={color.value}
                     onClick={() => setSelectedColor(color.value)}
@@ -544,6 +568,12 @@ export function CreateNoteDialog({
                   />
                 ))}
               </div>
+              <Button
+                onClick={() => setIsCustomColorDialogOpen(true)}
+                className="mt-4 w-full bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+              >
+                Find a different color
+              </Button>
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
@@ -563,6 +593,61 @@ export function CreateNoteDialog({
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCustomColorDialogOpen} onOpenChange={setIsCustomColorDialogOpen}>
+        <DialogContent className="bg-slate-900 text-white border-slate-800">
+          <DialogHeader>
+            <DialogTitle>Pick Your Own Color</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <p className="text-sm text-white/80">
+                Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
+              </p>
+              <p className="text-sm text-white/80">
+                Paste it in this box:
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={customColorInput}
+                  onChange={(e) => {
+                    let value = e.target.value.replace('#', '');
+                    setCustomColorInput(value);
+                  }}
+                  className="bg-slate-800 border-slate-700"
+                  placeholder="Enter hex color (ex: FFB4A2)"
+                />
+                <div 
+                  className="w-10 h-10 rounded-lg border border-white/20"
+                  style={{ backgroundColor: `#${customColorInput}` }}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCustomColorDialogOpen(false)}
+                  className="bg-transparent border-slate-700 hover:bg-slate-800"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (customColorInput) {
+                      setSelectedColor(`#${customColorInput}`);
+                      setIsCustomColorDialogOpen(false);
+                      setCustomColorInput("");
+                    }
+                  }}
+                  className="bg-slate-800 hover:bg-slate-700 text-white"
+                  disabled={!customColorInput.match(/^[0-9A-Fa-f]{6}$/)}
+                >
+                  Apply Color
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
