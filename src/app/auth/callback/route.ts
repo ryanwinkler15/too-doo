@@ -11,5 +11,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  // Redirect to the home page with the full URL
+  return NextResponse.redirect('https://too-doo-grodt.vercel.app/');
 } 
