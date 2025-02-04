@@ -136,7 +136,10 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     try {
       const { error } = await supabase
         .from('notes')
-        .update({ is_completed: true })
+        .update({ 
+          is_completed: true,
+          completed_at: new Date().toISOString()
+        })
         .eq('id', id);
         
       if (error) throw error;
