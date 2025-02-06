@@ -192,14 +192,14 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Recent Activity Chart */}
-            <div className="h-[250px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
               <h2 className="text-2xl font-semibold">Recent Activity</h2>
-              <div className="h-[200px] mt-4">
+              <div className="h-[250px] mt-4">
                 <BarChart 
                   data={activityData} 
                   margin={{ top: 32, right: 10, left: 10, bottom: 16 }}
                   width={500}
-                  height={180}
+                  height={230}
                 >
                   <XAxis
                     dataKey="day"
@@ -262,8 +262,8 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="h-[250px] bg-slate-900 rounded-xl p-6 border border-slate-800">
-              <h2 className="text-lg font-semibold mb-4">Priority Tasks</h2>
+            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+              <h2 className="text-2xl font-semibold mb-4">Priority Tasks</h2>
               {/* Visualization will go here */}
             </div>
 
