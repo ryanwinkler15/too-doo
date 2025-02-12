@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
-              <h2 className="text-2xl font-semibold mb-4">Focus Areas</h2>
+              <h2 className="text-2xl font-semibold mb-4">Active Focus</h2>
               <FocusAreaCharts />
             </div>
 

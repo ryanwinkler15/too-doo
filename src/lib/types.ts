@@ -4,6 +4,7 @@ export interface Note {
   description: string;
   due_date?: string;
   is_priority?: boolean;
+  is_list?: boolean;
   label?: {
     id: string;
     name: string;

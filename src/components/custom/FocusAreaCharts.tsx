@@ -8,6 +8,8 @@ import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from '@/components/ui/chart';
 
 interface Label {
@@ -30,7 +32,6 @@ interface ChartData {
 export function FocusAreaCharts() {
   const [labels, setLabels] = useState<Label[]>([]);
   const [activeTaskCounts, setActiveTaskCounts] = useState<TaskCount[]>([]);
-  const [allTaskCounts, setAllTaskCounts] = useState<TaskCount[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
 
@@ -58,13 +59,6 @@ export function FocusAreaCharts() {
         if (activeError) throw activeError;
         setActiveTaskCounts(activeData || []);
 
-        // Fetch all task counts by label
-        const { data: allData, error: allError } = await supabase
-          .rpc('get_all_task_counts_by_label', { user_id_param: user.id });
-        
-        if (allError) throw allError;
-        setAllTaskCounts(allData || []);
-
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -76,31 +70,55 @@ export function FocusAreaCharts() {
   }, [supabase]);
 
   // Transform data for charts
-  const activeChartData: ChartData[] = useMemo(() => {
-    return labels.map(label => ({
-      name: label.name,
-      value: activeTaskCounts.find(tc => tc.label_id === label.id)?.count || 0,
-      fill: label.color
-    })).filter(item => item.value > 0);
+  const chartData: ChartData[] = useMemo(() => {
+    // First, create the full dataset including unlabeled notes
+    const fullData = [
+      // Add "Unmarked" entry for notes with null label_id
+      {
+        name: 'Unmarked',
+        value: activeTaskCounts.find(tc => tc.label_id === null)?.count || 0,
+        fill: '#64748b' // slate-500 for unmarked notes
+      },
+      // Add all labeled notes
+      ...labels.map(label => ({
+        name: label.name,
+        value: activeTaskCounts.find(tc => tc.label_id === label.id)?.count || 0,
+        fill: label.color
+      }))
+    ].filter(item => item.value > 0);
+
+    // Sort by value in descending order
+    const sortedData = [...fullData].sort((a, b) => b.value - a.value);
+
+    // If we have 6 or fewer items, return them all
+    if (sortedData.length <= 5) {
+      return sortedData;
+    }
+
+    // Take top 5 items
+    const topItems = sortedData.slice(0, 5);
+
+    // Calculate sum of remaining items
+    const otherValue = sortedData
+      .slice(5)
+      .reduce((sum, item) => sum + item.value, 0);
+
+    // Add "Other" category if there are remaining items
+    if (otherValue > 0) {
+      topItems.push({
+        name: 'Other',
+        value: otherValue,
+        fill: '#475569' // slate-600 for "Other" category
+      });
+    }
+
+    return topItems;
   }, [labels, activeTaskCounts]);
 
-  const allChartData: ChartData[] = useMemo(() => {
-    return labels.map(label => ({
-      name: label.name,
-      value: allTaskCounts.find(tc => tc.label_id === label.id)?.count || 0,
-      fill: label.color
-    })).filter(item => item.value > 0);
-  }, [labels, allTaskCounts]);
-
-  // Calculate totals for center text
-  const totalActive = useMemo(() => 
-    activeChartData.reduce((acc, curr) => acc + curr.value, 0),
-    [activeChartData]
-  );
-
-  const totalAll = useMemo(() => 
-    allChartData.reduce((acc, curr) => acc + curr.value, 0),
-    [allChartData]
+  // Calculate total for center text
+  const total = useMemo(() => 
+    chartData.reduce((acc, curr) => acc + curr.value, 0),
+    [chartData]
   );
 
   // Create chart config from labels
@@ -124,76 +142,43 @@ export function FocusAreaCharts() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 h-full">
-      {/* Active Tasks Chart */}
-      <div className="flex flex-col">
-        <h3 className="text-sm font-medium mb-2">Active Tasks</h3>
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square h-full"
-        >
-          <PieChart>
-            <Pie
-              data={activeChartData}
-              dataKey="value"
-              nameKey="name"
-              innerRadius={60}
-              strokeWidth={2}
-              stroke="#0f172a"
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-white text-2xl font-bold"
-                        >
-                          {totalActive}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 20}
-                          className="fill-slate-400 text-sm"
-                        >
-                          notes
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-            <ChartLegend
-              content={<ChartLegendContent nameKey="name" />}
-              className="text-xs flex-wrap gap-2"
-            />
-          </PieChart>
-        </ChartContainer>
-      </div>
+    <div className="h-full">
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto h-[250px] pb-4"
+      >
+        <div className="flex items-center justify-between">
+          {/* Legend - Left Side */}
+          <div className="flex flex-col space-y-2 pl-4">
+            {chartData.map((entry) => (
+              <div key={entry.name} className="flex items-center space-x-2">
+                <div 
+                  className="w-3 h-3 rounded-sm" 
+                  style={{ backgroundColor: entry.fill }}
+                />
+                <span className="text-sm text-slate-200">
+                  {entry.name}
+                </span>
+              </div>
+            ))}
+          </div>
 
-      {/* All Tasks Chart */}
-      <div className="flex flex-col">
-        <h3 className="text-sm font-medium mb-2">All Tasks</h3>
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square h-full"
-        >
-          <PieChart>
+          {/* Pie Chart - Right Side */}
+          <PieChart width={250} height={200}>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
             <Pie
-              data={allChartData}
+              data={chartData}
               dataKey="value"
               nameKey="name"
-              innerRadius={60}
+              innerRadius={45}
+              outerRadius={80}
               strokeWidth={2}
               stroke="#0f172a"
+              cy={85}
+              cx={125}
             >
               <Label
                 content={({ viewBox }) => {
@@ -210,7 +195,7 @@ export function FocusAreaCharts() {
                           y={viewBox.cy}
                           className="fill-white text-2xl font-bold"
                         >
-                          {totalAll}
+                          {total}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
@@ -225,13 +210,9 @@ export function FocusAreaCharts() {
                 }}
               />
             </Pie>
-            <ChartLegend
-              content={<ChartLegendContent nameKey="name" />}
-              className="text-xs flex-wrap gap-2"
-            />
           </PieChart>
-        </ChartContainer>
-      </div>
+        </div>
+      </ChartContainer>
     </div>
   );
 } 

@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, Square, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -43,13 +43,28 @@ interface NoteCardProps {
   dueDate?: string;
   onDelete?: () => void;
   isPriority?: boolean;
+  is_list?: boolean;
 }
 
-export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false }: NoteCardProps) {
+export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false, is_list = false }: NoteCardProps) {
   const supabase = createClientComponentClient();
   const [isDeleted, setIsDeleted] = useState(false);
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [listItems, setListItems] = useState<Array<{ text: string; isCompleted: boolean }>>([]);
+  const [showCompletedItems, setShowCompletedItems] = useState(false);
+
+  useEffect(() => {
+    if (is_list && description) {
+      try {
+        const parsedItems = JSON.parse(description);
+        setListItems(parsedItems);
+      } catch (error) {
+        console.error('Error parsing list items:', error);
+        setListItems([]);
+      }
+    }
+  }, [is_list, description]);
 
   // Log props when component receives them
   useEffect(() => {
@@ -159,6 +174,93 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     }
   };
 
+  const handleToggleListItem = async (index: number) => {
+    try {
+      const updatedItems = [...listItems];
+      updatedItems[index].isCompleted = !updatedItems[index].isCompleted;
+      setListItems(updatedItems);
+
+      const { error } = await supabase
+        .from('notes')
+        .update({ 
+          description: JSON.stringify(updatedItems)
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Check if all items are now completed
+      const allCompleted = updatedItems.every(item => item.isCompleted);
+      
+      if (allCompleted) {
+        const { dismiss } = toast({
+          title: "All items completed!",
+          description: "Do you want to complete this note now?",
+          action: (
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                autoFocus
+                onClick={async () => {
+                  try {
+                    const { error } = await supabase
+                      .from('notes')
+                      .update({ 
+                        is_completed: true,
+                        completed_at: new Date().toISOString()
+                      })
+                      .eq('id', id);
+                      
+                    if (error) throw error;
+                    
+                    onDelete?.(); // Refresh the notes list
+                    toast({
+                      description: "Note marked as completed",
+                      variant: "default"
+                    });
+                  } catch (error) {
+                    console.error('Error completing note:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to complete note",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                Complete
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => dismiss()}
+              >
+                Cancel
+              </Button>
+            </div>
+          ),
+          duration: 5000,
+        });
+      }
+      
+      // Refresh the notes list after successful update
+      onDelete?.();
+    } catch (error) {
+      console.error('Error updating list item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update list item",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (isDeleted) return null;
 
   return (
@@ -211,9 +313,68 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
             {title}
           </h3>
           <div className="relative flex-grow overflow-hidden pointer-events-auto">
-            <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
-              {description}
-            </p>
+            {is_list ? (
+              <div className="text-white text-opacity-90 overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+                {(() => {
+                  try {
+                    // Filter items based on showCompletedItems state
+                    const itemsToShow = showCompletedItems 
+                      ? listItems 
+                      : listItems.filter(item => !item.isCompleted);
+
+                    return itemsToShow.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2 mb-2 group/item">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const realIndex = listItems.findIndex(i => i.text === item.text);
+                            handleToggleListItem(realIndex);
+                          }}
+                          className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80"
+                        >
+                          {item.isCompleted ? (
+                            <CheckSquare className="w-5 h-5 text-white" />
+                          ) : (
+                            <Square className="w-5 h-5 text-white" />
+                          )}
+                        </button>
+                        <span className={cn(
+                          "text-sm break-words flex-1",
+                          item.isCompleted && "line-through text-white/50"
+                        )}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ));
+                  } catch (error) {
+                    console.error('Error displaying list items:', error);
+                    return <p className="text-red-400">Error displaying list items</p>;
+                  }
+                })()}
+                {/* Show completed items count if any */}
+                {(() => {
+                  const completedCount = listItems.filter(item => item.isCompleted).length;
+                  if (completedCount > 0) {
+                    return (
+                      <div 
+                        className="text-sm text-white/50 mt-2 border-t border-white/10 pt-2 cursor-pointer hover:text-white/70 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowCompletedItems(!showCompletedItems);
+                        }}
+                      >
+                        {showCompletedItems ? "Hide" : "Show"} {completedCount} completed {completedCount === 1 ? 'item' : 'items'}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            ) : (
+              <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+                {description}
+              </p>
+            )}
           </div>
         </div>
 
@@ -277,6 +438,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           description,
           label_id: label?.id,
           due_date: dueDate,
+          is_list: is_list,
           label: label ? {
             name: label.name,
             color: label.color
