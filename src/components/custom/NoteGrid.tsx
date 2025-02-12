@@ -92,6 +92,7 @@ export function NoteGrid({
               dueDate={note.due_date}
               onDelete={onDelete}
               isPriority={isSelectionMode ? isSelected : note.is_priority}
+              is_list={note.is_list}
             />
           </div>
         );

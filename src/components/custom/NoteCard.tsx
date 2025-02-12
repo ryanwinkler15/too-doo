@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, Square, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -43,13 +43,27 @@ interface NoteCardProps {
   dueDate?: string;
   onDelete?: () => void;
   isPriority?: boolean;
+  is_list?: boolean;
 }
 
-export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false }: NoteCardProps) {
+export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false, is_list = false }: NoteCardProps) {
   const supabase = createClientComponentClient();
   const [isDeleted, setIsDeleted] = useState(false);
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [listItems, setListItems] = useState<Array<{ text: string; isCompleted: boolean }>>([]);
+
+  useEffect(() => {
+    if (is_list && description) {
+      try {
+        const parsedItems = JSON.parse(description);
+        setListItems(parsedItems);
+      } catch (error) {
+        console.error('Error parsing list items:', error);
+        setListItems([]);
+      }
+    }
+  }, [is_list, description]);
 
   // Log props when component receives them
   useEffect(() => {
@@ -159,6 +173,33 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     }
   };
 
+  const handleToggleListItem = async (index: number) => {
+    try {
+      const updatedItems = [...listItems];
+      updatedItems[index].isCompleted = !updatedItems[index].isCompleted;
+      setListItems(updatedItems);
+
+      const { error } = await supabase
+        .from('notes')
+        .update({ 
+          description: JSON.stringify(updatedItems)
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Refresh the notes list after successful update
+      onDelete?.();
+    } catch (error) {
+      console.error('Error updating list item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update list item",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (isDeleted) return null;
 
   return (
@@ -211,9 +252,62 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
             {title}
           </h3>
           <div className="relative flex-grow overflow-hidden pointer-events-auto">
-            <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
-              {description}
-            </p>
+            {is_list ? (
+              <div className="text-white text-opacity-90 overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+                {(() => {
+                  try {
+                    const items = JSON.parse(description);
+                    return items.map((item: { text: string; isCompleted: boolean }, index: number) => (
+                      <div key={index} className="flex items-center gap-2 mb-2 group/item">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleListItem(index);
+                          }}
+                          className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80"
+                        >
+                          {item.isCompleted ? (
+                            <CheckSquare className="w-5 h-5 text-white" />
+                          ) : (
+                            <Square className="w-5 h-5 text-white" />
+                          )}
+                        </button>
+                        <span className={cn(
+                          "text-sm break-words flex-1",
+                          item.isCompleted && "line-through text-white/50"
+                        )}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ));
+                  } catch (error) {
+                    console.error('Error parsing list items:', error);
+                    return <p className="text-red-400">Error displaying list items</p>;
+                  }
+                })()}
+                {/* Show completed items count if any */}
+                {(() => {
+                  try {
+                    const items = JSON.parse(description);
+                    const completedCount = items.filter((item: { isCompleted: boolean }) => item.isCompleted).length;
+                    if (completedCount > 0) {
+                      return (
+                        <div className="text-sm text-white/50 mt-2 border-t border-white/10 pt-2">
+                          {completedCount} completed {completedCount === 1 ? 'item' : 'items'}
+                        </div>
+                      );
+                    }
+                  } catch (error) {
+                    // Silently handle parsing error
+                  }
+                  return null;
+                })()}
+              </div>
+            ) : (
+              <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+                {description}
+              </p>
+            )}
           </div>
         </div>
 

@@ -39,6 +39,7 @@ export default function Home() {
           description,
           due_date,
           is_priority,
+          is_list,
           label:label_id (
             id,
             name,

@@ -28,6 +28,7 @@ export default function CompletedPage() {
           title,
           description,
           due_date,
+          is_list,
           label:label_id (
             id,
             name,

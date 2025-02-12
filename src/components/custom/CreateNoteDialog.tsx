@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, CheckSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -52,6 +52,12 @@ interface SavedLabel {
 type CommandItemProps = React.ComponentPropsWithoutRef<typeof CommandItem>;
 type CommandProps = React.ComponentPropsWithoutRef<typeof Command>;
 
+interface ListItem {
+  id: string;
+  text: string;
+  isCompleted: boolean;
+}
+
 interface CreateNoteDialogProps {
   onNoteCreated?: () => void;
   mode?: 'create' | 'edit';
@@ -61,6 +67,7 @@ interface CreateNoteDialogProps {
     description: string;
     label_id?: string;
     due_date?: string;
+    is_list?: boolean;
     label?: {
       name: string;
       color: string;
@@ -91,6 +98,8 @@ export function CreateNoteDialog({
   const [availableColors, setAvailableColors] = useState<Array<{ value: string; label: string; }>>([]);
   const [isCustomColorDialogOpen, setIsCustomColorDialogOpen] = useState(false);
   const [customColorInput, setCustomColorInput] = useState("");
+  const [isListMode, setIsListMode] = useState(false);
+  const [listItems, setListItems] = useState<ListItem[]>([{ id: '1', text: '', isCompleted: false }]);
   
   const supabase = createClientComponentClient();
 
@@ -99,7 +108,20 @@ export function CreateNoteDialog({
     if (mode === 'edit' && noteToEdit && isOpen) {
       // In edit mode, load the note data
       setTitle(noteToEdit.title);
-      setDescription(noteToEdit.description);
+      setIsListMode(noteToEdit.is_list || false);
+      
+      if (noteToEdit.is_list) {
+        try {
+          const parsedItems = JSON.parse(noteToEdit.description);
+          setListItems(parsedItems);
+        } catch (error) {
+          console.error('Error parsing list items:', error);
+          setListItems([{ id: '1', text: '', isCompleted: false }]);
+        }
+      } else {
+        setDescription(noteToEdit.description);
+      }
+      
       setDate(noteToEdit.due_date ? new Date(noteToEdit.due_date) : undefined);
       setSelectedLabelId(noteToEdit.label_id || "");
     } else if (mode === 'create' && isOpen) {
@@ -108,6 +130,8 @@ export function CreateNoteDialog({
       setDescription("");
       setDate(undefined);
       setSelectedLabelId("");
+      setIsListMode(false);
+      setListItems([{ id: '1', text: '', isCompleted: false }]);
     }
   }, [mode, noteToEdit, isOpen]);
 
@@ -174,7 +198,6 @@ export function CreateNoteDialog({
     console.log('Submit button clicked');
 
     try {
-      // Get the session instead of user
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -189,26 +212,26 @@ export function CreateNoteDialog({
         return;
       }
 
-      console.log('Current session:', session);
-
       if (mode === 'create') {
+        // Filter out empty list items before saving
+        const filteredListItems = listItems.filter(item => item.text.trim() !== '');
+        
         const noteData = {
           title,
-          description,
+          description: isListMode 
+            ? JSON.stringify(filteredListItems.map(item => ({
+                text: item.text.trim(),
+                isCompleted: item.isCompleted
+              })))
+            : description,
           label_id: selectedLabelId || null,
           due_date: date?.toISOString() || null,
-          user_id: session.user.id
+          user_id: session.user.id,
+          is_list: isListMode
         };
-        
-        // Add debug logging
-        console.log('Debug - Session:', {
-          sessionId: session.access_token,
-          userId: session.user.id,
-          noteUserId: noteData.user_id
-        });
-        
-        console.log('Creating note with data:', noteData);
 
+        console.log('Creating note with data:', noteData);
+        
         const { data: newNote, error: insertError } = await supabase
           .from('notes')
           .insert([noteData])
@@ -224,22 +247,36 @@ export function CreateNoteDialog({
         console.log('Note created successfully:', newNote);
         toast.success('Note created!');
         
-        // Clear form and close dialog
+        // Reset all state
         setTitle("");
         setDescription("");
         setDate(undefined);
         setSelectedLabelId("");
+        setIsListMode(false);
+        setListItems([{ id: '1', text: '', isCompleted: false }]);
+        
+        // Close dialog and notify parent
         onNoteCreated?.();
         onOpenChange?.(false);
       } else {
         // Update note
+        const filteredListItems = isListMode 
+          ? listItems.filter(item => item.text.trim() !== '')
+          : [];
+
         const { error } = await supabase
           .from('notes')
           .update({
             title,
-            description,
+            description: isListMode 
+              ? JSON.stringify(filteredListItems.map(item => ({
+                  text: item.text.trim(),
+                  isCompleted: item.isCompleted
+                })))
+              : description,
             label_id: selectedLabelId || null,
             due_date: date?.toISOString() || null,
+            is_list: isListMode
           })
           .eq('id', noteToEdit?.id)
           .eq('user_id', session.user.id);
@@ -254,6 +291,8 @@ export function CreateNoteDialog({
         setDescription("");
         setDate(undefined);
         setSelectedLabelId("");
+        setIsListMode(false);
+        setListItems([{ id: '1', text: '', isCompleted: false }]);
         onNoteCreated?.();
         onOpenChange?.(false);
       }
@@ -322,6 +361,39 @@ export function CreateNoteDialog({
       setDescription("");
       setDate(undefined);
       setSelectedLabelId("");
+      setIsListMode(false);  // Reset list mode
+      setListItems([{ id: '1', text: '', isCompleted: false }]);  // Reset to initial list item
+    }
+  };
+
+  const handleListItemChange = (id: string, text: string) => {
+    setListItems(prevItems => {
+      const updatedItems = prevItems.map(item =>
+        item.id === id ? { ...item, text } : item
+      );
+      
+      // If the last item has text, add a new empty item
+      if (id === prevItems[prevItems.length - 1].id && text.trim() !== '') {
+        return [...updatedItems, { id: String(Date.now()), text: '', isCompleted: false }];
+      }
+      
+      return updatedItems;
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const newItem = { id: String(Date.now()), text: '', isCompleted: false };
+      setListItems(prev => [...prev, newItem]);
+      
+      // Focus the new input after a brief delay to allow render
+      setTimeout(() => {
+        const newInput = document.getElementById(`list-item-${newItem.id}`);
+        if (newInput) {
+          newInput.focus();
+        }
+      }, 0);
     }
   };
 
@@ -348,14 +420,47 @@ export function CreateNoteDialog({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-                placeholder="Enter description (optional)"
-                className="bg-[#111111] border-[#1A1A1A] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/40 [&::-webkit-scrollbar-track]:bg-transparent"
-              />
+              <div className="flex justify-between items-center">
+                <Label htmlFor="description">Description</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex items-center gap-2 px-2 hover:bg-slate-800"
+                  title="Convert to checklist"
+                  onClick={() => setIsListMode(!isListMode)}
+                >
+                  <span className="text-white text-sm">List</span>
+                  <CheckSquare className="h-12 w-12 text-white" />
+                </Button>
+              </div>
+              
+              {isListMode ? (
+                <div className="space-y-2 bg-[#111111] rounded-md border border-[#1A1A1A] p-2">
+                  {listItems.map((item, index) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        <Plus className="w-4 h-4 text-slate-400" />
+                      </div>
+                      <Input
+                        id={`list-item-${item.id}`}
+                        value={item.text}
+                        onChange={(e) => handleListItemChange(item.id, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(e, item.id)}
+                        placeholder={index === 0 ? "List item" : ""}
+                        className="bg-transparent border-none focus:ring-0 placeholder-slate-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+                  placeholder="Enter description (optional)"
+                  className="bg-[#111111] border-[#1A1A1A] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/40 [&::-webkit-scrollbar-track]:bg-transparent"
+                />
+              )}
             </div>
             
             <div className="space-y-2">
