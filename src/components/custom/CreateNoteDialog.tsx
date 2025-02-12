@@ -112,8 +112,19 @@ export function CreateNoteDialog({
       
       if (noteToEdit.is_list) {
         try {
+          // Parse the JSON description into list items
           const parsedItems = JSON.parse(noteToEdit.description);
-          setListItems(parsedItems);
+          // Ensure each item has an id
+          const itemsWithIds = parsedItems.map((item: any) => ({
+            id: String(Math.random()),
+            text: item.text,
+            isCompleted: item.isCompleted
+          }));
+          // Add an empty item at the end if all items are filled
+          if (itemsWithIds.every((item: any) => item.text.trim() !== '')) {
+            itemsWithIds.push({ id: String(Math.random()), text: '', isCompleted: false });
+          }
+          setListItems(itemsWithIds);
         } catch (error) {
           console.error('Error parsing list items:', error);
           setListItems([{ id: '1', text: '', isCompleted: false }]);

@@ -52,6 +52,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [listItems, setListItems] = useState<Array<{ text: string; isCompleted: boolean }>>([]);
+  const [showCompletedItems, setShowCompletedItems] = useState(false);
 
   useEffect(() => {
     if (is_list && description) {
@@ -188,6 +189,66 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
 
       if (error) throw error;
       
+      // Check if all items are now completed
+      const allCompleted = updatedItems.every(item => item.isCompleted);
+      
+      if (allCompleted) {
+        const { dismiss } = toast({
+          title: "All items completed!",
+          description: "Do you want to complete this note now?",
+          action: (
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                autoFocus
+                onClick={async () => {
+                  try {
+                    const { error } = await supabase
+                      .from('notes')
+                      .update({ 
+                        is_completed: true,
+                        completed_at: new Date().toISOString()
+                      })
+                      .eq('id', id);
+                      
+                    if (error) throw error;
+                    
+                    onDelete?.(); // Refresh the notes list
+                    toast({
+                      description: "Note marked as completed",
+                      variant: "default"
+                    });
+                  } catch (error) {
+                    console.error('Error completing note:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to complete note",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                Complete
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => dismiss()}
+              >
+                Cancel
+              </Button>
+            </div>
+          ),
+          duration: 5000,
+        });
+      }
+      
       // Refresh the notes list after successful update
       onDelete?.();
     } catch (error) {
@@ -256,13 +317,18 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
               <div className="text-white text-opacity-90 overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
                 {(() => {
                   try {
-                    const items = JSON.parse(description);
-                    return items.map((item: { text: string; isCompleted: boolean }, index: number) => (
+                    // Filter items based on showCompletedItems state
+                    const itemsToShow = showCompletedItems 
+                      ? listItems 
+                      : listItems.filter(item => !item.isCompleted);
+
+                    return itemsToShow.map((item, index) => (
                       <div key={index} className="flex items-center gap-2 mb-2 group/item">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleToggleListItem(index);
+                            const realIndex = listItems.findIndex(i => i.text === item.text);
+                            handleToggleListItem(realIndex);
                           }}
                           className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80"
                         >
@@ -281,24 +347,25 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                       </div>
                     ));
                   } catch (error) {
-                    console.error('Error parsing list items:', error);
+                    console.error('Error displaying list items:', error);
                     return <p className="text-red-400">Error displaying list items</p>;
                   }
                 })()}
                 {/* Show completed items count if any */}
                 {(() => {
-                  try {
-                    const items = JSON.parse(description);
-                    const completedCount = items.filter((item: { isCompleted: boolean }) => item.isCompleted).length;
-                    if (completedCount > 0) {
-                      return (
-                        <div className="text-sm text-white/50 mt-2 border-t border-white/10 pt-2">
-                          {completedCount} completed {completedCount === 1 ? 'item' : 'items'}
-                        </div>
-                      );
-                    }
-                  } catch (error) {
-                    // Silently handle parsing error
+                  const completedCount = listItems.filter(item => item.isCompleted).length;
+                  if (completedCount > 0) {
+                    return (
+                      <div 
+                        className="text-sm text-white/50 mt-2 border-t border-white/10 pt-2 cursor-pointer hover:text-white/70 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowCompletedItems(!showCompletedItems);
+                        }}
+                      >
+                        {showCompletedItems ? "Hide" : "Show"} {completedCount} completed {completedCount === 1 ? 'item' : 'items'}
+                      </div>
+                    );
                   }
                   return null;
                 })()}
@@ -371,6 +438,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           description,
           label_id: label?.id,
           due_date: dueDate,
+          is_list: is_list,
           label: label ? {
             name: label.name,
             color: label.color
