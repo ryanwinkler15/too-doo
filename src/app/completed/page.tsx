@@ -7,19 +7,12 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Note } from "@/lib/types";
 import Link from 'next/link';
 import { NavBar } from "@/components/ui/tubelight-navbar";
+import { navItems } from "@/lib/navigation";
 
 export default function CompletedPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeTab, setActiveTab] = useState("Completed");
   const supabase = createClientComponentClient();
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
 
   const fetchCompletedNotes = async () => {
     try {

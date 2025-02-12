@@ -60,7 +60,7 @@ export default function AuthPage() {
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
             <BackgroundPaths 
                 title="Too Doo" 
-                subtitle="Stay on top. Win each day" 
+                subtitle="Stay on top. Win each day." 
             />
             
             <div className="w-full max-w-md space-y-8 bg-slate-900 p-8 rounded-lg shadow-xl relative z-10">

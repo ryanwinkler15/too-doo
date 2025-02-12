@@ -2,17 +2,10 @@
 
 import { useState } from 'react';
 import { NavBar } from "@/components/ui/tubelight-navbar";
+import { navItems } from "@/lib/navigation";
 
 export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState("Schedule");
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4">

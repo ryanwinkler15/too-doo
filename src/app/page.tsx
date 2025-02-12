@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { NoteGrid } from "@/components/custom/NoteGrid";
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseClient } from '@/lib/supabase-client';
 import { Plus, Star, AlignJustify } from "lucide-react";
 import { Note } from "@/lib/types";
 import Link from "next/link";
 import { OrganizeMenu } from "@/components/custom/OrganizeMenu";
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { cn } from "@/lib/utils";
+import { navItems } from "@/lib/navigation";
+import { StreakDisplay } from "@/components/custom/StreakDisplay";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -20,15 +22,7 @@ export default function Home() {
   const [showPriorityOnly, setShowPriorityOnly] = useState(false);
   const [sortByDueDate, setSortByDueDate] = useState(false);
   const [activeTab, setActiveTab] = useState("Active");
-  const supabase = createClientComponentClient();
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
+  const supabase = getSupabaseClient();
 
   const fetchNotes = async () => {
     try {
@@ -128,6 +122,11 @@ export default function Home() {
         />
       </div>
       
+      {/* Streak Display */}
+      <div className="mb-4 ml-2">
+        <StreakDisplay size="sm" />
+      </div>
+      
       {/* Action Buttons */}
       <div className="flex justify-end mb-8">
         <div className="flex gap-4">
@@ -162,16 +161,13 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Main Content Area - Note Grid */}
-      <div className="px-4">
-        <NoteGrid 
-          notes={notes} 
-          onDelete={fetchNotes} 
-          isSelectionMode={isSelectionMode}
-          onExitSelectionMode={handleExitSelectionMode}
-          onPriorityChange={fetchNotes}
-        />
-      </div>
+      {/* Note Grid */}
+      <NoteGrid 
+        notes={notes} 
+        onDelete={fetchNotes} 
+        isSelectionMode={isSelectionMode} 
+        onExitSelectionMode={handleExitSelectionMode}
+      />
     </div>
   );
 }

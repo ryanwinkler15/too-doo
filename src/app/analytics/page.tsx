@@ -5,20 +5,10 @@ import { NavBar } from "@/components/ui/tubelight-navbar";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { AiFillFire } from "react-icons/ai";
 import { Bar, BarChart, XAxis, Tooltip, Legend } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { StreakDisplay } from "@/components/custom/StreakDisplay";
+import { FocusAreaCharts } from "@/components/custom/FocusAreaCharts";
+import { navItems } from "@/lib/navigation";
 
 interface ActivityData {
   day: string;
@@ -28,48 +18,8 @@ interface ActivityData {
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState("Analytics");
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [longestStreak, setLongestStreak] = useState(0);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const supabase = createClientComponentClient();
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
-
-  // Fetch user stats
-  useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        // Get current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        if (!user) throw new Error('No user found');
-
-        // Get user stats
-        const { data, error } = await supabase
-          .from('user_stats')
-          .select('current_streak, longest_streak')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) throw error;
-        
-        if (data) {
-          setCurrentStreak(data.current_streak);
-          setLongestStreak(data.longest_streak);
-        }
-      } catch (error) {
-        console.error('Error fetching user stats:', error);
-      }
-    };
-
-    fetchUserStats();
-  }, [supabase]);
 
   // Fetch activity data
   useEffect(() => {
@@ -156,32 +106,15 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Streak Card */}
             <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
-              <div className="flex flex-col">
-                <h2 className="text-2xl font-semibold">Streak</h2>
-                <p className="text-white text-sm mt-1 max-w-[120px]">
-                  Complete at least one note per day
-                </p>
-              </div>
-              <div className="flex flex-col items-center h-[calc(100%-5rem)] justify-center gap-4 -mt-8">
-                <div className="relative flex items-center justify-center w-full">
-                  <div className="flex items-center justify-center">
-                    <div className="relative w-48 h-48 flex items-center justify-center">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <AiFillFire className="w-full h-full absolute text-orange-500" />
-                      </div>
-                      <span className="text-7xl font-bold text-white relative z-10 transform translate-y-6 -translate-x-1">
-                        {currentStreak}
-                      </span>
-                    </div>
-                    <span className="text-4xl text-white ml-2 transform translate-y-6">
-                      days
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center -mt-2">
-                  <p className="text-sm text-white">
-                    Longest streak: {longestStreak} days 🔥
+              <div className="flex flex-col h-full">
+                <div>
+                  <h2 className="text-2xl font-semibold">Streak</h2>
+                  <p className="text-white text-sm mt-1 max-w-[120px]">
+                    Complete at least one note per day
                   </p>
+                </div>
+                <div className="flex-1 flex items-center justify-center -mt-4">
+                  <StreakDisplay size="lg" />
                 </div>
               </div>
             </div>
@@ -263,8 +196,8 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
-              <h2 className="text-2xl font-semibold mb-4">Priority Tasks</h2>
-              {/* Visualization will go here */}
+              <h2 className="text-2xl font-semibold mb-4">Focus Areas</h2>
+              <FocusAreaCharts />
             </div>
 
             <div className="col-span-2 h-[250px] bg-slate-900 rounded-xl p-6 border border-slate-800">

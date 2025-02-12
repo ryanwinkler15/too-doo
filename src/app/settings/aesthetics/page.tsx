@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { navItems } from "@/lib/navigation";
 
 const colors = [
   { value: '#CB9DF0', label: 'Purple' },
@@ -65,14 +66,6 @@ export default function AestheticsPage() {
   const [createLabelCustomColorInput, setCreateLabelCustomColorInput] = useState("");
   const router = useRouter();
   const supabase = createClientComponentClient();
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

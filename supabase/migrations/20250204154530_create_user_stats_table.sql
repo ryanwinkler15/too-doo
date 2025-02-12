@@ -107,20 +107,10 @@ CREATE TRIGGER on_note_completed
 -- Create function to initialize user_stats on user creation
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
-DECLARE
-    last_note_completion TIMESTAMPTZ;
 BEGIN
-    -- Get the most recent note completion for this user if any exists
-    SELECT completed_at INTO last_note_completion
-    FROM notes
-    WHERE user_id = NEW.id
-        AND is_completed = true
-    ORDER BY completed_at DESC
-    LIMIT 1;
-
-    -- Insert user_stats with the last completion date if it exists
-    INSERT INTO public.user_stats (user_id, last_completion_date)
-    VALUES (NEW.id, last_note_completion)
+    -- Insert user_stats with null last_completion_date for new users
+    INSERT INTO public.user_stats (user_id, last_completion_date, current_streak, longest_streak)
+    VALUES (NEW.id, NULL, 0, 0)
     ON CONFLICT (user_id) DO NOTHING;
     
     RETURN NEW;

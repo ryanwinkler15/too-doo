@@ -9,20 +9,13 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
+import { navItems } from "@/lib/navigation";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Settings");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient();
-
-  const navItems = [
-    { name: 'Active', url: '/' },
-    { name: 'Schedule', url: '/schedule' },
-    { name: 'Completed', url: '/completed' },
-    { name: 'Analytics', url: '/analytics' },
-    { name: 'Settings', url: '/settings' }
-  ];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
