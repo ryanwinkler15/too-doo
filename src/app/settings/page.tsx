@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { navItems } from "@/lib/navigation";
-import { ThemeToggle } from "@/components/custom/ThemeToggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemeDebug } from "@/components/custom/ThemeDebug";
 
 export default function SettingsPage() {

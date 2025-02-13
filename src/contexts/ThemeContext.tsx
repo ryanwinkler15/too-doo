@@ -18,13 +18,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       // Try to get theme from localStorage
       const savedTheme = localStorage.getItem('theme') as Theme;
-      return savedTheme || 'dark';
+      // If no saved theme, check system preference
+      if (!savedTheme) {
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return systemPrefersDark ? 'dark' : 'light';
+      }
+      return savedTheme;
     }
     return 'dark'; // Default to dark theme
   });
 
   // Effect to sync theme with HTML class and localStorage
   useEffect(() => {
+    console.log('Theme changed to:', theme);
     // Update the HTML class
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -37,7 +43,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+    console.log('Toggle theme called. Current theme:', theme);
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'dark' ? 'light' : 'dark';
+      console.log('Setting new theme to:', newTheme);
+      return newTheme;
+    });
   };
 
   return (
