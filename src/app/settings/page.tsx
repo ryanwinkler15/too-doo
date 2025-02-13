@@ -59,19 +59,18 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation Bar with Theme Toggle */}
-      <div className="absolute top-0 left-0 right-0 p-4 pb-0 z-10">
-        <div className="relative">
-          <NavBar 
-            items={navItems}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            className="relative"
-          />
-          {/* Theme Toggle positioned absolutely in the top right */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <ThemeToggle />
-          </div>
+      <div className="absolute top-0 left-0 right-0 p-4 pb-0">
+        {/* Theme Toggle positioned as a separate element */}
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
         </div>
+        
+        <NavBar 
+          items={navItems}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          className="relative"
+        />
       </div>
 
       <div className="flex h-screen pt-[72px]">
