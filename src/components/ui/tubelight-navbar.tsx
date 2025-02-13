@@ -33,44 +33,47 @@ export function NavBar({ items, className, activeTab, setActiveTab }: NavBarProp
   }, [])
 
   return (
-    <div className={cn("z-50 flex justify-center", className)}>
-      <div className="inline-flex items-center gap-3 bg-[#0A0A0A] border border-[#1A1A1A] backdrop-blur-lg py-1 px-1 rounded-full shadow-lg ring-1 ring-white/20">
-        {items.map((item) => {
-          const isActive = activeTab === item.name
-
-          return (
-            <Link
-              key={item.name}
-              href={item.url}
-              onClick={() => setActiveTab(item.name)}
-              className={cn(
-                "relative cursor-pointer text-sm font-bold px-6 py-2 rounded-full transition-colors",
-                "text-white hover:text-white",
-                isActive && "text-white",
-              )}
-            >
-              <span>{item.name}</span>
-              {isActive && (
-                <motion.div
-                  layoutId="lamp"
-                  className="absolute inset-0 w-full bg-white/5 rounded-full -z-10"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                  }}
-                >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-white rounded-t-full">
-                    <div className="absolute w-12 h-6 bg-white/20 rounded-full blur-md -top-2 -left-2" />
-                    <div className="absolute w-8 h-6 bg-white/20 rounded-full blur-md -top-1" />
-                    <div className="absolute w-4 h-4 bg-white/20 rounded-full blur-sm top-0 left-2" />
-                  </div>
-                </motion.div>
-              )}
-            </Link>
-          )
-        })}
+    <div className={cn("relative z-50", className)}>
+      <div className="fixed left-1/2 -translate-x-1/2 top-4">
+        <div className="relative">
+          {/* Background bubble */}
+          <div className="absolute inset-0 bg-background border border-border rounded-full blur-sm" />
+          <div className="relative rounded-full border border-border bg-background px-1.5 py-1.5 shadow-lg">
+            <div className="flex items-center gap-2">
+              {items.map((item) => {
+                const isActive = activeTab === item.name
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.url}
+                    onClick={() => setActiveTab(item.name)}
+                    className={cn(
+                      "relative rounded-full px-3 py-1.5 text-sm font-bold outline-2 outline-sky-400 transition focus-visible:outline",
+                      "text-black dark:text-foreground hover:text-black dark:hover:text-foreground"
+                    )}
+                    style={{
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="navbar-bubble"
+                        className="absolute inset-0 bg-primary/10 dark:bg-primary/20 border-border"
+                        style={{ borderRadius: 9999 }}
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
+                      />
+                    )}
+                    {item.name}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

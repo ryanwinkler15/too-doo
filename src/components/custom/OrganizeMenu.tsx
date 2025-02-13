@@ -87,20 +87,10 @@ export function OrganizeMenu({
       }
   }, [showLabels]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && searchValue) {
-      // Find the first label that matches the search value
-      const matchingLabel = labels.find(label => 
-        label.name.toLowerCase().includes(searchValue.toLowerCase())
-      );
-
-      if (matchingLabel) {
-        e.preventDefault();
-        setLabelValue(matchingLabel.name);
-        onLabelSelect(matchingLabel.id);
-        setShowLabels(false);
-        setSearchValue("");
-      }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setShowLabels(false);
+      setOpen(false);
     }
   };
 
@@ -109,15 +99,15 @@ export function OrganizeMenu({
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+          className="bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg"
         >
           <AlignJustify className="w-4 h-4 mr-2" />
           Organize
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-[#0A0A0A] text-white border-[#1A1A1A]">
+      <DropdownMenuContent className="w-56 bg-background border-border">
         <DropdownMenuItem 
-          className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
+          className="text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
           onSelect={(event) => {
             event.preventDefault();
             onPriorityFilter();
@@ -130,7 +120,7 @@ export function OrganizeMenu({
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
-          className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
+          className="text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
           onSelect={(event) => {
             event.preventDefault();
             onDueDateSort();
@@ -145,53 +135,53 @@ export function OrganizeMenu({
         <Popover open={showLabels} onOpenChange={setShowLabels}>
           <PopoverTrigger asChild>
             <DropdownMenuItem 
-              className="text-white hover:bg-[#111111] focus:bg-[#111111] focus:text-white"
+              className="text-foreground hover:bg-accent focus:bg-accent focus:text-accent-foreground"
               onSelect={(event) => {
-                event.preventDefault()
-                setShowLabels(true)
-                setOpen(true)
+                event.preventDefault();
+                setShowLabels(true);
+                setOpen(true);
               }}
             >
               Label
             </DropdownMenuItem>
           </PopoverTrigger>
           <PopoverContent 
-            className="p-0 bg-[#0A0A0A] border-[#1A1A1A] w-56" 
+            className="p-0 bg-background border-border w-56" 
             align="start"
             alignOffset={-5}
             sideOffset={0}
             onOpenAutoFocus={(event) => {
-              event.preventDefault()
+              event.preventDefault();
               setTimeout(() => {
-                inputRef.current?.focus()
-              }, 0)
+                inputRef.current?.focus();
+              }, 0);
             }}
             onInteractOutside={(e) => {
               e.preventDefault();
             }}
           >
-            <Command className="bg-[#0A0A0A]">
+            <Command className="bg-background">
               <CommandInput 
                 ref={inputRef}
                 placeholder="Search labels..." 
                 value={searchValue}
                 onValueChange={setSearchValue}
                 onKeyDown={handleKeyDown}
-                className="text-white placeholder:text-slate-400 bg-[#111111] border-[#1A1A1A]"
+                className="text-foreground bg-background border-border"
               />
-              <CommandEmpty className="text-white">No label found.</CommandEmpty>
+              <CommandEmpty className="text-foreground">No label found.</CommandEmpty>
               <CommandGroup>
                 {labels.map((label) => (
                   <CommandItem
                     key={label.id}
                     value={label.name}
                     onSelect={(currentValue) => {
-                      setLabelValue(currentValue === labelValue ? "" : currentValue)
-                      onLabelSelect(label.id)
-                      setShowLabels(false)
-                      setOpen(false)
+                      setLabelValue(currentValue === labelValue ? "" : currentValue);
+                      onLabelSelect(label.id);
+                      setShowLabels(false);
+                      setOpen(false);
                     }}
-                    className="text-white aria-selected:bg-[#111111] aria-selected:text-white hover:bg-[#111111] hover:text-white focus:bg-[#111111] focus:text-white"
+                    className="text-foreground aria-selected:bg-accent aria-selected:text-accent-foreground"
                   >
                     <Check
                       className={cn(

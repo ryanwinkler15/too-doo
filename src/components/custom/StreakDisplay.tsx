@@ -81,7 +81,7 @@ export function StreakDisplay({ size = 'lg', className }: StreakDisplayProps) {
                   <AiFillFire className="w-full h-full absolute text-orange-500" />
                 </div>
                 <span className={cn(
-                  "font-bold text-white relative z-10",
+                  "font-bold text-foreground relative z-10",
                   sizeClasses.sm.number
                 )}>
                   {currentStreak}
@@ -109,7 +109,7 @@ export function StreakDisplay({ size = 'lg', className }: StreakDisplayProps) {
               <AiFillFire className="w-full h-full absolute text-orange-500" />
             </div>
             <span className={cn(
-              "font-bold text-white relative z-10 transform translate-y-4",
+              "font-bold text-foreground relative z-10 transform translate-y-4",
               sizeClasses.lg.number
             )}>
               {currentStreak}
@@ -117,14 +117,14 @@ export function StreakDisplay({ size = 'lg', className }: StreakDisplayProps) {
           </div>
         </div>
         <span className={cn(
-          "text-white ml-4 transform translate-y-4",
+          "text-foreground ml-4 transform translate-y-4",
           sizeClasses.lg.text
         )}>
           days
         </span>
       </div>
       <div className="-mt-4">
-        <p className="text-sm text-white">
+        <p className="text-sm text-foreground">
           Longest streak: {longestStreak} days 🔥
         </p>
       </div>

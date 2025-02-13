@@ -1,3 +1,5 @@
+'use client';
+
 import { Check, Pencil, Trash2, Square, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -268,8 +270,8 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
       <div
         className={cn(
           "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl h-[200px]",
-          cardStyle ? "" : defaultBg,
-          cardStyle ? "" : defaultBorder,
+          cardStyle ? "" : "bg-card",
+          cardStyle ? "" : "border-border",
           "transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
           className
         )}
@@ -296,25 +298,25 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
           <div className="flex items-start gap-2 mb-1">
             {label && (
               <div
-                className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium text-white border border-white/30"
+                className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium text-foreground border border-border/30"
                 style={{ backgroundColor: darkenColor(label.color, 15) }}
               >
                 {label.name}
               </div>
             )}
             {dueDate && (
-              <div className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium bg-black/30 text-white border border-white/20">
+              <div className="inline-flex h-6 items-center px-2 rounded-full text-sm font-medium bg-background/30 text-foreground border border-border/20">
                 {format(new Date(dueDate), "MM/dd/yy")}
               </div>
             )}
           </div>
 
-          <h3 className="text-xl font-semibold text-white mb-1">
+          <h3 className="text-xl font-semibold text-foreground mb-1">
             {title}
           </h3>
           <div className="relative flex-grow overflow-hidden pointer-events-auto">
             {is_list ? (
-              <div className="text-white text-opacity-90 overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+              <div className="text-foreground text-opacity-90 overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/90 [&::-webkit-scrollbar-track]:bg-transparent">
                 {(() => {
                   try {
                     // Filter items based on showCompletedItems state
@@ -330,17 +332,17 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                             const realIndex = listItems.findIndex(i => i.text === item.text);
                             handleToggleListItem(realIndex);
                           }}
-                          className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80"
+                          className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-foreground/20 rounded hover:opacity-80"
                         >
                           {item.isCompleted ? (
-                            <CheckSquare className="w-5 h-5 text-white" />
+                            <CheckSquare className="w-5 h-5 text-foreground" />
                           ) : (
-                            <Square className="w-5 h-5 text-white" />
+                            <Square className="w-5 h-5 text-foreground" />
                           )}
                         </button>
                         <span className={cn(
                           "text-sm break-words flex-1",
-                          item.isCompleted && "line-through text-white/50"
+                          item.isCompleted && "line-through text-foreground/50"
                         )}>
                           {item.text}
                         </span>
@@ -348,7 +350,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                     ));
                   } catch (error) {
                     console.error('Error displaying list items:', error);
-                    return <p className="text-red-400">Error displaying list items</p>;
+                    return <p className="text-destructive">Error displaying list items</p>;
                   }
                 })()}
                 {/* Show completed items count if any */}
@@ -357,7 +359,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                   if (completedCount > 0) {
                     return (
                       <div 
-                        className="text-sm text-white/50 mt-2 border-t border-white/10 pt-2 cursor-pointer hover:text-white/70 transition-colors"
+                        className="text-sm text-foreground/50 mt-2 border-t border-border/10 pt-2 cursor-pointer hover:text-foreground/70 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowCompletedItems(!showCompletedItems);
@@ -371,7 +373,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                 })()}
               </div>
             ) : (
-              <p className="text-white text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/90 [&::-webkit-scrollbar-track]:bg-transparent">
+              <p className="text-foreground text-opacity-90 whitespace-pre-line overflow-y-hidden group-hover:overflow-y-auto overflow-x-hidden absolute inset-0 pr-2 break-words [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/90 [&::-webkit-scrollbar-track]:bg-transparent">
                 {description}
               </p>
             )}
@@ -386,10 +388,10 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         >
           {/* Left side - Complete button */}
           <div 
-              onClick={handleComplete}
-            className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
-            >
-            <Check className="w-5 h-5" strokeWidth={2} />
+            onClick={handleComplete}
+            className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-foreground/10"
+          >
+            <Check className="w-5 h-5 text-foreground" strokeWidth={2} />
           </div>
 
           {/* Right side - Edit and Delete buttons */}
@@ -407,18 +409,17 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
                 });
                 setIsEditing(true);
               }}
-              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
+              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-foreground/10"
             >
-              <Pencil className="w-5 h-5" strokeWidth={2} />
+              <Pencil className="w-5 h-5 text-foreground" strokeWidth={2} />
             </button>
             <button 
               onClick={handleDelete}
-              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10"
+              className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-foreground/10"
             >
-              <Trash2 className="w-5 h-5" strokeWidth={2} />
+              <Trash2 className="w-5 h-5 text-foreground" strokeWidth={2} />
             </button>
           </div>
-
         </div>
         <div 
           className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300"

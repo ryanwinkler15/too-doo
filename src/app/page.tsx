@@ -106,7 +106,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4">
+    <div className="min-h-screen bg-background text-foreground p-4">
       <CreateNoteDialog 
         onNoteCreated={fetchNotes} 
         isOpen={isCreating}
@@ -124,7 +124,7 @@ export default function Home() {
       </div>
       
       {/* Streak Display */}
-      <div className="mb-4 ml-2">
+      <div className="mb-2 ml-2 mt-12">
         <StreakDisplay size="sm" />
       </div>
       
@@ -134,7 +134,7 @@ export default function Home() {
           <Button 
             variant="outline" 
             onClick={() => setIsCreating(true)}
-            className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+            className="bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg"
           >
             <Plus className="w-4 h-4 mr-2" />
             New
@@ -150,10 +150,10 @@ export default function Home() {
             variant="outline" 
             onClick={() => setIsSelectionMode(!isSelectionMode)}
             className={cn(
-              "bg-[#0A0A0A] border border-[#1A1A1A] rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20",
+              "bg-background border border-border rounded-full px-6 py-2 font-bold text-sm shadow-lg",
               isSelectionMode 
-                ? "text-white" 
-                : "text-white hover:text-white"
+                ? "text-foreground" 
+                : "text-foreground hover:text-foreground"
             )}
           >
             <Star className="w-4 h-4 mr-2" />
