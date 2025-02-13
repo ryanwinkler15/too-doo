@@ -58,13 +58,8 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top Navigation Bar with Theme Toggle */}
+      {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 p-4 pb-0">
-        {/* Theme Toggle positioned as a separate element */}
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
-        
         <NavBar 
           items={navItems}
           activeTab={activeTab}
@@ -107,7 +102,12 @@ export default function SettingsPage() {
         <div className="flex-1 flex flex-col">
           {/* Settings Content */}
           <div className="flex-1 p-6 md:p-10 border-l border-border">
-            <h1 className="text-2xl font-bold mb-6">Settings</h1>
+            {/* Settings Header with Theme Toggle */}
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Settings</h1>
+              <ThemeToggle />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <SettingsCard
                 title="Profile Settings"

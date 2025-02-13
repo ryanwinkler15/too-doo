@@ -27,19 +27,19 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   };
 
   return (
-    <div
+    <button
       className={cn(
-        "flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 select-none hover:ring-2 hover:ring-primary/50 active:scale-95",
+        "flex w-16 h-8 p-1 rounded-full transition-all duration-300",
+        "hover:ring-2 hover:ring-primary/50 active:scale-95",
         isDark 
-          ? "bg-zinc-950 border border-zinc-800" 
-          : "bg-white border border-zinc-200",
+          ? "bg-zinc-800 border border-zinc-700" 
+          : "bg-zinc-100 border border-zinc-200",
         className
       )}
       onClick={handleClick}
       onKeyDown={handleKeyPress}
       role="button"
       tabIndex={0}
-      style={{ cursor: 'pointer' }}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
     >
       <div className="flex justify-between items-center w-full pointer-events-none">
@@ -47,8 +47,8 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           className={cn(
             "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300",
             isDark 
-              ? "transform translate-x-0 bg-zinc-800" 
-              : "transform translate-x-8 bg-gray-200"
+              ? "transform translate-x-0 bg-zinc-950" 
+              : "transform translate-x-8 bg-white"
           )}
         >
           {isDark ? (
@@ -58,7 +58,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             />
           ) : (
             <Sun 
-              className="w-4 h-4 text-gray-700" 
+              className="w-4 h-4 text-zinc-900" 
               strokeWidth={1.5}
             />
           )}
@@ -73,17 +73,17 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         >
           {isDark ? (
             <Sun 
-              className="w-4 h-4 text-gray-500" 
+              className="w-4 h-4 text-zinc-400" 
               strokeWidth={1.5}
             />
           ) : (
             <Moon 
-              className="w-4 h-4 text-black" 
+              className="w-4 h-4 text-zinc-600" 
               strokeWidth={1.5}
             />
           )}
         </div>
       </div>
-    </div>
+    </button>
   )
 } 
