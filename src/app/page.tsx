@@ -168,6 +168,7 @@ export default function Home() {
         onDelete={fetchNotes} 
         isSelectionMode={isSelectionMode} 
         onExitSelectionMode={handleExitSelectionMode}
+        onPriorityChange={fetchNotes}
       />
     </div>
   );

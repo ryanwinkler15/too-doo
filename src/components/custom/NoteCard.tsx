@@ -283,7 +283,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
         <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-4 h-full transition-all duration-300 group-hover:-translate-y-10">
           {/* Priority Icon */}
           {isPriority && (
-            <div className="absolute top-4 right-5">
+            <div className="absolute top-2 right-5">
               <Image
                 src="/clock-icon.png"
                 alt="Priority"
