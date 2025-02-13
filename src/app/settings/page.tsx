@@ -11,6 +11,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { navItems } from "@/lib/navigation";
 import { ThemeToggle } from "@/components/custom/ThemeToggle";
+import { ThemeDebug } from "@/components/custom/ThemeDebug";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Settings");
@@ -133,6 +134,9 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Add ThemeDebug component */}
+      <ThemeDebug />
     </div>
   );
 }
