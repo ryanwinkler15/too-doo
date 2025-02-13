@@ -411,7 +411,9 @@ export function CreateNoteDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="bg-[#0A0A0A] text-white border border-[#1A1A1A] ring-1 ring-white/20 shadow-lg">
+        <DialogContent className={cn(
+          "bg-background text-foreground border border-border shadow-lg"
+        )}>
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               {mode === 'create' ? 'Create New Note' : 'Edit Note'}
@@ -426,7 +428,7 @@ export function CreateNoteDialog({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter title"
                 required
-                className="bg-[#111111] border-[#1A1A1A]"
+                className="bg-background border-border"
               />
             </div>
             
@@ -436,21 +438,21 @@ export function CreateNoteDialog({
                 <Button
                   type="button"
                   variant="ghost"
-                  className="flex items-center gap-2 px-2 hover:bg-slate-800"
+                  className="flex items-center gap-2 px-2 hover:bg-accent"
                   title="Convert to checklist"
                   onClick={() => setIsListMode(!isListMode)}
                 >
-                  <span className="text-white text-sm">List</span>
-                  <CheckSquare className="h-12 w-12 text-white" />
+                  <span className="text-foreground text-sm">List</span>
+                  <CheckSquare className="h-12 w-12 text-foreground" />
                 </Button>
               </div>
               
               {isListMode ? (
-                <div className="space-y-2 bg-[#111111] rounded-md border border-[#1A1A1A] p-2">
+                <div className="space-y-2 bg-background rounded-md border border-border p-2">
                   {listItems.map((item, index) => (
                     <div key={item.id} className="flex items-center gap-2">
                       <div className="w-6 h-6 flex items-center justify-center">
-                        <Plus className="w-4 h-4 text-slate-400" />
+                        <Plus className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <Input
                         id={`list-item-${item.id}`}
@@ -458,7 +460,7 @@ export function CreateNoteDialog({
                         onChange={(e) => handleListItemChange(item.id, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(e, item.id)}
                         placeholder={index === 0 ? "List item" : ""}
-                        className="bg-transparent border-none focus:ring-0 placeholder-slate-500"
+                        className="bg-transparent border-none focus:ring-0 placeholder-muted-foreground"
                       />
                     </div>
                   ))}
@@ -469,7 +471,7 @@ export function CreateNoteDialog({
                   value={description}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
                   placeholder="Enter description (optional)"
-                  className="bg-[#111111] border-[#1A1A1A] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/40 [&::-webkit-scrollbar-track]:bg-transparent"
+                  className="bg-background border-border [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-foreground/40 [&::-webkit-scrollbar-track]:bg-transparent"
                 />
               )}
             </div>
@@ -483,7 +485,7 @@ export function CreateNoteDialog({
                       variant="outline"
                       role="combobox"
                       aria-expanded={labelPopoverOpen}
-                      className="w-[200px] justify-between bg-[#111111] border-[#1A1A1A] text-left font-normal"
+                      className="w-[200px] justify-between bg-background border-border text-left font-normal"
                       tabIndex={0}
                       onClick={() => setLabelPopoverOpen(true)}
                       onFocus={(e) => {
@@ -513,15 +515,15 @@ export function CreateNoteDialog({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-0 bg-slate-900 border-slate-800">
+                  <PopoverContent className="w-[200px] p-0 bg-white dark:bg-background border-border">
                     <Command 
-                      className="bg-slate-900"
+                      className="bg-white dark:bg-background rounded-md border-none [&_div]:bg-white dark:[&_div]:bg-background"
                     >
                       <CommandInput 
                         placeholder="Search labels..." 
-                        className="bg-slate-800 text-white border-none focus:ring-0"
+                        className="bg-white dark:bg-background text-black dark:text-foreground border-none focus:ring-0 placeholder:text-muted-foreground h-9 [&_div]:bg-white dark:[&_div]:bg-background"
                       />
-                      <CommandList className="bg-slate-800 text-white">
+                      <CommandList className="bg-white dark:bg-background text-black dark:text-foreground max-h-[200px] overflow-y-auto p-1">
                         <CommandEmpty className="py-3 px-3 text-sm text-slate-400">
                           No labels found.
                         </CommandEmpty>
@@ -533,7 +535,6 @@ export function CreateNoteDialog({
                               onSelect={(value) => {
                                 handleCommandSelect(label.name);
                                 setLabelPopoverOpen(false);
-                                // Find and focus the calendar button after a short delay
                                 setTimeout(() => {
                                   const calendarButton = document.querySelector('[data-calendar-button="true"]');
                                   if (calendarButton instanceof HTMLElement) {
@@ -541,7 +542,7 @@ export function CreateNoteDialog({
                                   }
                                 }, 0);
                               }}
-                              className="text-white cursor-pointer hover:bg-slate-700"
+                              className="text-foreground cursor-pointer hover:bg-accent rounded-sm px-2 py-1.5 text-sm"
                             >
                               <div className="flex items-center gap-2">
                                 <div
@@ -582,10 +583,13 @@ export function CreateNoteDialog({
                   <Button
                     data-calendar-button="true"
                     variant="outline"
-                    className={`w-full justify-start text-left font-normal bg-[#111111] border-[#1A1A1A] ${!date && "text-slate-400"}`}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      "bg-background border-border",
+                      !date && "text-muted-foreground"
+                    )}
                     tabIndex={0}
                     onClick={() => {
-                      // Add a small delay to ensure the calendar is mounted before focusing
                       setTimeout(() => {
                         const calendar = document.querySelector('.rdp-day_today, .rdp-day_selected');
                         if (calendar instanceof HTMLElement) {
@@ -594,7 +598,6 @@ export function CreateNoteDialog({
                       }, 100);
                     }}
                     onFocus={(e) => {
-                      // Only open on focus if it was reached via keyboard navigation
                       if (e.relatedTarget) {
                         e.currentTarget.click();
                       }
@@ -604,7 +607,7 @@ export function CreateNoteDialog({
                     {date ? format(date, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-[#0A0A0A] border-[#1A1A1A]">
+                <PopoverContent className="w-auto p-0 bg-background border-border">
                   <Calendar
                     mode="single"
                     selected={date}
@@ -623,7 +626,24 @@ export function CreateNoteDialog({
                     }}
                     defaultMonth={date || new Date()}
                     initialFocus
-                    className="bg-[#0A0A0A]"
+                    className={cn(
+                      "bg-background rounded-md",
+                      "[&_.rdp-day]:text-black dark:[&_.rdp-day]:text-foreground",
+                      "[&_.rdp-button]:text-black dark:[&_.rdp-button]:text-foreground",
+                      "[&_.rdp-day_button:hover]:bg-accent",
+                      "[&_.rdp-day_button:focus]:bg-accent",
+                      "[&_.rdp-day_button:focus]:text-accent-foreground",
+                      "[&_.rdp-day_button.rdp-day_selected]:bg-primary",
+                      "[&_.rdp-day_button.rdp-day_selected]:text-primary-foreground",
+                      "[&_.rdp-nav_button]:text-black dark:[&_.rdp-nav_button]:text-foreground",
+                      "[&_.rdp-nav_button:hover]:bg-accent",
+                      "[&_.rdp-nav_button:focus]:bg-accent",
+                      "[&_.rdp-caption_label]:text-black dark:[&_.rdp-caption_label]:text-foreground",
+                      "[&_.rdp-head_cell]:text-black dark:[&_.rdp-head_cell]:text-muted-foreground",
+                      "[&_.rdp-day_today]:bg-accent/50 dark:[&_.rdp-day_today]:bg-accent/50",
+                      "[&_.rdp-day_outside]:text-black/50 dark:[&_.rdp-day_outside]:text-foreground/50",
+                      "[&_.rdp-button_reset]:text-black dark:[&_.rdp-button_reset]:text-foreground"
+                    )}
                   />
                 </PopoverContent>
               </Popover>
@@ -652,7 +672,7 @@ export function CreateNoteDialog({
       </Dialog>
 
       <Dialog open={labelDialogOpen} onOpenChange={setLabelDialogOpen}>
-        <DialogContent className="bg-[#0A0A0A] text-white border border-[#1A1A1A] ring-1 ring-white/20 shadow-lg">
+        <DialogContent className="bg-background text-foreground border border-border shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">New Label</DialogTitle>
           </DialogHeader>
@@ -665,7 +685,7 @@ export function CreateNoteDialog({
                 onChange={(e) => setNewLabelTitle(e.target.value)}
                 placeholder="Enter label title"
                 required
-                className="bg-[#111111] border-[#1A1A1A]"
+                className="bg-background border-border"
               />
             </div>
             
@@ -686,7 +706,7 @@ export function CreateNoteDialog({
               </div>
               <Button
                 onClick={() => setIsCustomColorDialogOpen(true)}
-                className="mt-4 w-full bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+                className="mt-4 w-full bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg"
               >
                 Find a different color
               </Button>
@@ -697,13 +717,13 @@ export function CreateNoteDialog({
                 type="button"
                 variant="outline"
                 onClick={() => setLabelDialogOpen(false)}
-                className="bg-slate-900 hover:bg-slate-800 text-white border-slate-800"
+                className="bg-background hover:bg-accent text-foreground border-border"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-slate-800 hover:bg-slate-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Create Label
               </Button>
@@ -713,16 +733,16 @@ export function CreateNoteDialog({
       </Dialog>
 
       <Dialog open={isCustomColorDialogOpen} onOpenChange={setIsCustomColorDialogOpen}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Pick Your Own Color</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <p className="text-sm text-white/80">
+              <p className="text-sm text-foreground/80">
                 Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
               </p>
-              <p className="text-sm text-white/80">
+              <p className="text-sm text-foreground/80">
                 Paste it in this box:
               </p>
               <div className="flex gap-2">
@@ -732,7 +752,7 @@ export function CreateNoteDialog({
                     let value = e.target.value.replace('#', '');
                     setCustomColorInput(value);
                   }}
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-background border-border"
                   placeholder="Enter hex color (ex: FFB4A2)"
                 />
                 <div 
@@ -744,7 +764,7 @@ export function CreateNoteDialog({
                 <Button
                   variant="outline"
                   onClick={() => setIsCustomColorDialogOpen(false)}
-                  className="bg-transparent border-slate-700 hover:bg-slate-800"
+                  className="bg-background border-border hover:bg-accent"
                 >
                   Cancel
                 </Button>
@@ -756,7 +776,7 @@ export function CreateNoteDialog({
                       setCustomColorInput("");
                     }
                   }}
-                  className="bg-slate-800 hover:bg-slate-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={!customColorInput.match(/^[0-9A-Fa-f]{6}$/)}
                 >
                   Apply Color

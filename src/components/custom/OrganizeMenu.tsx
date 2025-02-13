@@ -146,7 +146,7 @@ export function OrganizeMenu({
             </DropdownMenuItem>
           </PopoverTrigger>
           <PopoverContent 
-            className="p-0 bg-background border-border w-56" 
+            className="p-0 bg-white dark:bg-background border-border w-56" 
             align="start"
             alignOffset={-5}
             sideOffset={0}
@@ -160,16 +160,16 @@ export function OrganizeMenu({
               e.preventDefault();
             }}
           >
-            <Command className="bg-background">
+            <Command className="bg-white dark:bg-background rounded-md border-none [&_div]:bg-white dark:[&_div]:bg-background">
               <CommandInput 
                 ref={inputRef}
                 placeholder="Search labels..." 
                 value={searchValue}
                 onValueChange={setSearchValue}
                 onKeyDown={handleKeyDown}
-                className="text-foreground bg-background border-border"
+                className="bg-white dark:bg-background text-black dark:text-foreground border-none focus:ring-0 placeholder:text-muted-foreground h-9 [&_div]:bg-white dark:[&_div]:bg-background"
               />
-              <CommandEmpty className="text-foreground">No label found.</CommandEmpty>
+              <CommandEmpty className="py-3 px-3 text-sm text-slate-400">No label found.</CommandEmpty>
               <CommandGroup>
                 {labels.map((label) => (
                   <CommandItem
