@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { navItems } from "@/lib/navigation";
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Settings");
@@ -56,17 +57,23 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Top Navigation Bar - Now positioned absolutely */}
+      {/* Top Navigation Bar with Theme Toggle */}
       <div className="absolute top-0 left-0 right-0 p-4 pb-0 z-10">
-        <NavBar 
-          items={navItems}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          className="relative"
-        />
+        <div className="relative">
+          <NavBar 
+            items={navItems}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            className="relative"
+          />
+          {/* Theme Toggle positioned absolutely in the top right */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
 
-      <div className="flex h-screen pt-[72px]"> {/* Add padding-top to account for the nav bar */}
+      <div className="flex h-screen pt-[72px]">
         {/* Sidebar */}
         <div className="w-[300px] flex-shrink-0">
           <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
