@@ -8,7 +8,7 @@ export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState("Schedule");
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4">
+    <div className="min-h-screen bg-background text-foreground p-4">
       {/* Top Navigation Bar */}
       <div className="mb-8">
         <NavBar 
@@ -21,7 +21,7 @@ export default function SchedulePage() {
       
       {/* Main Content Area */}
       <div className="flex items-center justify-center h-[60vh]">
-        <h1 className="text-4xl font-bold text-white/60">Coming soon!</h1>
+        <h1 className="text-4xl font-bold text-foreground/60">Coming soon!</h1>
       </div>
     </div>
   );

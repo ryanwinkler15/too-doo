@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
   }, [supabase]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 p-4 pb-0 z-10">
         <NavBar 
@@ -105,11 +105,11 @@ export default function AnalyticsPage() {
           {/* Analytics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Streak Card */}
-            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="h-[300px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <div className="flex flex-col h-full">
                 <div>
                   <h2 className="text-2xl font-semibold">Streak</h2>
-                  <p className="text-white text-sm mt-1 max-w-[120px]">
+                  <p className="text-foreground text-sm mt-1 max-w-[120px]">
                     Complete at least one note per day
                   </p>
                 </div>
@@ -120,12 +120,12 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Score Card */}
-            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="h-[300px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <h2 className="text-2xl font-semibold">Score</h2>
             </div>
 
             {/* Recent Activity Chart */}
-            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="h-[300px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <h2 className="text-2xl font-semibold">Recent Activity</h2>
               <div className="h-[250px] mt-4">
                 <BarChart 
@@ -140,17 +140,18 @@ export default function AnalyticsPage() {
                     axisLine={false}
                     tickMargin={8}
                     fontSize={12}
-                    stroke="#ffffff"
+                    stroke="currentColor"
                   />
                   <Tooltip
                     cursor={false}
                     contentStyle={{
-                      background: "#1e293b",
-                      border: "none",
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
                       borderRadius: "8px",
-                      padding: "12px"
+                      padding: "12px",
+                      color: "var(--foreground)"
                     }}
-                    labelStyle={{ color: "#ffffff" }}
+                    labelStyle={{ color: "currentColor" }}
                   />
                   <Legend 
                     verticalAlign="bottom"
@@ -158,12 +159,12 @@ export default function AnalyticsPage() {
                     iconType="rect"
                     iconSize={8}
                     wrapperStyle={{
-                      color: "#ffffff",
+                      color: "currentColor",
                       marginTop: "16px",
                       paddingBottom: "4px",
                       fontSize: "12px"
                     }}
-                    formatter={(value: string) => <span style={{ color: '#ffffff', fontSize: '12px' }}>{value}</span>}
+                    formatter={(value: string) => <span style={{ color: 'currentColor', fontSize: '12px' }}>{value}</span>}
                   />
                   <Bar 
                     name="Created"
@@ -172,7 +173,7 @@ export default function AnalyticsPage() {
                     radius={[4, 4, 0, 0]}
                     label={{ 
                       position: 'top',
-                      fill: '#ffffff',
+                      fill: "currentColor",
                       fontSize: 12,
                       formatter: (value: number) => value > 0 ? value : '',
                       dy: -4
@@ -185,7 +186,7 @@ export default function AnalyticsPage() {
                     radius={[4, 4, 0, 0]}
                     label={{ 
                       position: 'top',
-                      fill: '#ffffff',
+                      fill: "currentColor",
                       fontSize: 12,
                       formatter: (value: number) => value > 0 ? value : '',
                       dy: -4
@@ -195,18 +196,18 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="h-[300px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="h-[300px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <h2 className="text-2xl font-semibold mb-4">Active Focus</h2>
               <FocusAreaCharts />
             </div>
 
-            <div className="col-span-2 h-[250px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="col-span-2 h-[250px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <h2 className="text-lg font-semibold mb-4">Completion Time</h2>
               {/* Visualization will go here */}
             </div>
 
             {/* Wide Card - Timeline */}
-            <div className="col-span-2 h-[200px] bg-slate-900 rounded-xl p-6 border border-slate-800">
+            <div className="col-span-2 h-[200px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
               <h2 className="text-lg font-semibold mb-4">Task Timeline</h2>
               {/* Visualization will go here */}
             </div>
@@ -221,13 +222,13 @@ const Logo = () => {
   return (
     <Link
       href="/"
-      className="font-normal flex space-x-2 items-center text-sm text-white py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-foreground py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <div className="h-5 w-6 bg-foreground rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium text-white whitespace-pre"
+        className="font-medium text-foreground whitespace-pre"
       >
         Too-Doo
       </motion.span>

@@ -156,7 +156,7 @@ export function FocusAreaCharts() {
                   className="w-3 h-3 rounded-sm" 
                   style={{ backgroundColor: entry.fill }}
                 />
-                <span className="text-sm text-slate-200">
+                <span className="text-sm text-foreground">
                   {entry.name}
                 </span>
               </div>
@@ -176,7 +176,7 @@ export function FocusAreaCharts() {
               innerRadius={45}
               outerRadius={80}
               strokeWidth={2}
-              stroke="#0f172a"
+              stroke="var(--background)"
               cy={85}
               cx={125}
             >
@@ -193,14 +193,14 @@ export function FocusAreaCharts() {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-white text-2xl font-bold"
+                          className="fill-foreground text-2xl font-bold"
                         >
                           {total}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 20}
-                          className="fill-slate-400 text-sm"
+                          className="fill-muted-foreground text-sm"
                         >
                           notes
                         </tspan>

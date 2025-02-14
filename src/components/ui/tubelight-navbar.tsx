@@ -38,7 +38,7 @@ export function NavBar({ items, className, activeTab, setActiveTab }: NavBarProp
         <div className="relative">
           {/* Background bubble */}
           <div className="absolute inset-0 bg-background border border-border rounded-full blur-sm" />
-          <div className="relative rounded-full border border-border bg-background px-1.5 py-1.5 shadow-lg">
+          <div className="relative rounded-full border border-border bg-background px-1.5 py-1.5 shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
             <div className="flex items-center gap-2">
               {items.map((item) => {
                 const isActive = activeTab === item.name
