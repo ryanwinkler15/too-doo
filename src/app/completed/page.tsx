@@ -58,7 +58,7 @@ export default function CompletedPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4">
+    <div className="min-h-screen bg-background text-foreground p-4">
       {/* Top Navigation Bar */}
       <div className="mb-8">
         <NavBar 

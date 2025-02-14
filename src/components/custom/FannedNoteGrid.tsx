@@ -126,7 +126,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 p-8 pt-32 overflow-auto"
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 p-8 pt-32 overflow-auto"
             onClick={handleBackdropClick}
           >
             <motion.div
@@ -136,7 +136,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
               className="w-full max-w-[1800px] mx-auto"
             >
               {/* Title of expanded stack */}
-              <h2 className="text-3xl font-bold text-white mb-12 text-center">
+              <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
                 {expandedStack} Notes
               </h2>
               
@@ -185,7 +185,12 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                             zIndex: 19 - index,
                           }}
                         >
-                          <div className="h-full w-full border border-slate-600/50 rounded-xl shadow-md">
+                          <div className="h-full w-full border border-slate-700/50 rounded-xl shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]"
+                            style={{
+                              backgroundColor: group.label.color || undefined,
+                              borderColor: "rgb(100, 116, 139)"
+                            }}
+                          >
                             <NoteCard
                               id={note.id}
                               title={note.title}
@@ -204,16 +209,16 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                     <motion.div
                       className={cn(
                         "absolute inset-0 rounded-xl p-6 flex items-center justify-center",
-                        "border border-slate-700",
-                        group.label.color ? "" : "bg-slate-800"
+                        "border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]",
+                        group.label.color ? "" : "bg-card"
                       )}
                       style={{
                         backgroundColor: group.label.color || undefined,
-                        borderColor: group.label.color || undefined,
+                        borderColor: "rgb(100, 116, 139)",
                         zIndex: 20
                       }}
                     >
-                      <h2 className="text-2xl font-bold text-white">
+                      <h2 className="text-2xl font-bold text-foreground">
                         {group.label.name}
                         {group.notes.length > 0 && (
                           <span className="ml-2 text-sm opacity-70">
