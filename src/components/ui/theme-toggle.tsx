@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -14,8 +15,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Theme toggle clicked');
-    console.log('Current theme:', theme);
     toggleTheme();
   };
 

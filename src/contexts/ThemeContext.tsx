@@ -12,44 +12,43 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<Theme>('dark'); // Default to dark to match server
+
   // Initialize theme state
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check if we're in the browser
-    if (typeof window !== 'undefined') {
-      // Try to get theme from localStorage
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      // If no saved theme, check system preference
-      if (!savedTheme) {
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return systemPrefersDark ? 'dark' : 'light';
-      }
-      return savedTheme;
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(systemPrefersDark ? 'dark' : 'light');
     }
-    return 'dark'; // Default to dark theme
-  });
+    setMounted(true);
+  }, []);
 
   // Effect to sync theme with HTML class and localStorage
   useEffect(() => {
-    console.log('Theme changed to:', theme);
-    // Update the HTML class
+    if (!mounted) return;
+
+    const root = document.documentElement;
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
     }
     
-    // Save to localStorage
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
-    console.log('Toggle theme called. Current theme:', theme);
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'dark' ? 'light' : 'dark';
-      console.log('Setting new theme to:', newTheme);
-      return newTheme;
-    });
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
+
+  // Prevent flash during hydration
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

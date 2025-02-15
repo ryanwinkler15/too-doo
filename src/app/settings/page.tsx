@@ -1,16 +1,23 @@
 'use client';
 
+import * as React from 'react';
 import { useState } from 'react';
 import { NavBar } from "@/components/ui/tubelight-navbar";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { LayoutDashboard, UserCog, Settings, LogOut, Palette, CreditCard } from "lucide-react";
+import { UserCog, LogOut, Palette, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { navItems } from "@/lib/navigation";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import dynamic from 'next/dynamic';
+
+// Dynamically import ThemeToggle with no SSR to prevent hydration issues
+const ThemeToggle = dynamic(
+  () => import('@/components/ui/theme-toggle').then(mod => mod.ThemeToggle),
+  { ssr: false }
+);
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("Settings");
@@ -28,28 +35,28 @@ export default function SettingsPage() {
       label: "Profile",
       href: "/settings/profile",
       icon: (
-        <UserCog className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <UserCog className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Aesthetics",
       href: "/settings/aesthetics",
       icon: (
-        <Palette className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Palette className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Subscription",
       href: "/settings/subscription",
       icon: (
-        <CreditCard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <CreditCard className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Logout",
       href: "#",
       icon: (
-        <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <LogOut className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
       onClick: handleSignOut,
     },
