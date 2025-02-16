@@ -77,28 +77,28 @@ export default function AestheticsPage() {
       label: "Profile",
       href: "/settings/profile",
       icon: (
-        <UserCog className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <UserCog className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Aesthetics",
       href: "/settings/aesthetics",
       icon: (
-        <Palette className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <Palette className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Subscription",
       href: "/settings/subscription",
       icon: (
-        <CreditCard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <CreditCard className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Logout",
       href: "#",
       icon: (
-        <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <LogOut className="text-foreground h-5 w-5 flex-shrink-0" />
       ),
       onClick: handleSignOut,
     },
@@ -314,7 +314,7 @@ export default function AestheticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation Bar - Now positioned absolutely */}
       <div className="absolute top-0 left-0 right-0 p-4 pb-0 z-10">
         <NavBar 
@@ -344,8 +344,8 @@ export default function AestheticsPage() {
                     label: "User Profile",
                     href: "/settings/profile",
                     icon: (
-                      <div className="w-7 h-7 rounded-full bg-slate-900 flex items-center justify-center">
-                        <UserCog className="h-4 w-4 text-white" />
+                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center">
+                        <UserCog className="h-4 w-4 text-secondary-foreground" />
                       </div>
                     ),
                   }}
@@ -358,33 +358,33 @@ export default function AestheticsPage() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {/* Aesthetics Content */}
-          <div className="flex-1 p-6 md:p-10 border-l border-slate-900">
+          <div className="flex-1 p-6 md:p-10 border-l border-border">
             <div className="max-w-xl mx-auto" style={{ marginLeft: "calc((100% - 300px - 32rem) / 2)" }}>
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h1 className="text-2xl font-bold">Labels</h1>
-                  <p className="text-sm text-white mt-1">Click the name and color to edit.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Click the name and color to edit.</p>
                 </div>
                 <Button
                   onClick={() => setIsCreatingLabel(true)}
-                  className="bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+                  className="bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-border"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   New
                 </Button>
               </div>
               
-              <div className="rounded-lg border border-slate-800">
+              <div className="rounded-lg border border-border">
                 <Table>
                   <TableBody>
                     {labels.map((label) => (
-                      <TableRow key={label.id} className="hover:bg-slate-900/50 border-slate-800">
+                      <TableRow key={label.id} className="hover:bg-muted/50 border-border">
                         <TableCell className="font-medium">
                           {editingLabelId === label.id ? (
                             <input
                               type="text"
                               defaultValue={label.name}
-                              className="bg-transparent border-b border-slate-700 focus:border-slate-500 outline-none px-1"
+                              className="bg-transparent border-b border-muted focus:border-primary outline-none px-1"
                               onBlur={(e) => handleLabelNameEdit(label.id, e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -396,7 +396,7 @@ export default function AestheticsPage() {
                           ) : (
                             <span 
                               onClick={() => setEditingLabelId(label.id)}
-                              className="cursor-pointer hover:text-slate-300"
+                              className="cursor-pointer hover:text-muted-foreground"
                             >
                               {label.name}
                             </span>
@@ -405,14 +405,14 @@ export default function AestheticsPage() {
                         <TableCell className="w-[60px] pl-2 py-3">
                           <div 
                             onClick={() => setEditingColorLabelId(label.id)}
-                            className="w-6 h-6 rounded-full border border-white/20 cursor-pointer hover:ring-2 hover:ring-white/40 transition-all"
+                            className="w-6 h-6 rounded-full border border-border cursor-pointer hover:ring-2 hover:ring-ring transition-all"
                             style={{ backgroundColor: label.color }}
                           />
                         </TableCell>
                         <TableCell className="w-[50px] pl-0 py-3">
                           <button
                             onClick={() => handleDeleteLabel(label.id)}
-                            className="text-red-400/70 hover:text-red-400 p-2 rounded-lg transition-colors hover:bg-white/5"
+                            className="text-destructive/70 hover:text-destructive p-2 rounded-lg transition-colors hover:bg-muted"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -429,7 +429,7 @@ export default function AestheticsPage() {
 
       {/* Create Label Dialog */}
       <Dialog open={isCreatingLabel} onOpenChange={setIsCreatingLabel}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Create New Label</DialogTitle>
           </DialogHeader>
@@ -440,7 +440,7 @@ export default function AestheticsPage() {
                 id="name"
                 value={newLabelName}
                 onChange={(e) => setNewLabelName(e.target.value)}
-                className="bg-slate-800 border-slate-700"
+                className="bg-muted border-border"
                 placeholder="Enter label name"
               />
             </div>
@@ -453,7 +453,7 @@ export default function AestheticsPage() {
                     onClick={() => setSelectedColor(color.value)}
                     className={cn(
                       "w-8 h-8 rounded-full cursor-pointer transition-transform hover:scale-110",
-                      selectedColor === color.value ? "ring-2 ring-white" : ""
+                      selectedColor === color.value ? "ring-2 ring-ring" : ""
                     )}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
@@ -462,7 +462,7 @@ export default function AestheticsPage() {
               </div>
               <Button
                 onClick={() => setIsCreateLabelCustomColorDialogOpen(true)}
-                className="mt-4 w-full bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+                className="mt-4 w-full bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-border"
               >
                 Find a different color
               </Button>
@@ -471,13 +471,13 @@ export default function AestheticsPage() {
               <Button
                 variant="outline"
                 onClick={() => setIsCreatingLabel(false)}
-                className="bg-transparent border-slate-700 hover:bg-slate-800"
+                className="bg-transparent border-border hover:bg-muted"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateLabel}
-                className="bg-slate-800 hover:bg-slate-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Create Label
               </Button>
@@ -488,7 +488,7 @@ export default function AestheticsPage() {
 
       {/* Color Edit Dialog */}
       <Dialog open={editingColorLabelId !== null} onOpenChange={(open) => !open && setEditingColorLabelId(null)}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Edit Label Color</DialogTitle>
           </DialogHeader>
@@ -508,7 +508,7 @@ export default function AestheticsPage() {
                       }}
                       className={cn(
                         "w-8 h-8 rounded-full cursor-pointer transition-transform hover:scale-110",
-                        label?.color === color.value ? "ring-2 ring-white" : ""
+                        label?.color === color.value ? "ring-2 ring-ring" : ""
                       )}
                       style={{ backgroundColor: color.value }}
                       title={color.label}
@@ -518,7 +518,7 @@ export default function AestheticsPage() {
               </div>
               <Button
                 onClick={() => setIsCustomColorDialogOpen(true)}
-                className="mt-4 w-full bg-[#0A0A0A] border border-[#1A1A1A] text-white hover:text-white rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-white/20"
+                className="mt-4 w-full bg-background border border-border text-foreground hover:text-foreground rounded-full px-6 py-2 font-bold text-sm shadow-lg ring-1 ring-border"
               >
                 Find a different color
               </Button>
@@ -529,16 +529,16 @@ export default function AestheticsPage() {
 
       {/* Custom Color Dialog */}
       <Dialog open={isCustomColorDialogOpen} onOpenChange={setIsCustomColorDialogOpen}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Pick Your Own Color</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <p className="text-sm text-white/80">
-                Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
+              <p className="text-sm text-muted-foreground">
+                Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
               </p>
-              <p className="text-sm text-white/80">
+              <p className="text-sm text-muted-foreground">
                 Paste it in this box:
               </p>
               <div className="flex gap-2">
@@ -548,11 +548,11 @@ export default function AestheticsPage() {
                     let value = e.target.value.replace('#', '');
                     setCustomColorInput(value);
                   }}
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-muted border-border"
                   placeholder="Enter hex color (ex: FFB4A2)"
                 />
                 <div 
-                  className="w-10 h-10 rounded-lg border border-white/20"
+                  className="w-10 h-10 rounded-lg border border-border"
                   style={{ backgroundColor: `#${customColorInput}` }}
                 />
               </div>
@@ -560,7 +560,7 @@ export default function AestheticsPage() {
                 <Button
                   variant="outline"
                   onClick={() => setIsCustomColorDialogOpen(false)}
-                  className="bg-transparent border-slate-700 hover:bg-slate-800"
+                  className="bg-transparent border-border hover:bg-muted"
                 >
                   Cancel
                 </Button>
@@ -572,7 +572,7 @@ export default function AestheticsPage() {
                       setCustomColorInput("");
                     }
                   }}
-                  className="bg-slate-800 hover:bg-slate-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={!customColorInput.match(/^[0-9A-Fa-f]{6}$/)}
                 >
                   Apply Color
@@ -585,16 +585,16 @@ export default function AestheticsPage() {
 
       {/* Custom Color Dialog for Create Label */}
       <Dialog open={isCreateLabelCustomColorDialogOpen} onOpenChange={setIsCreateLabelCustomColorDialogOpen}>
-        <DialogContent className="bg-slate-900 text-white border-slate-800">
+        <DialogContent className="bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Pick Your Own Color</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <p className="text-sm text-white/80">
-                Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
+              <p className="text-sm text-muted-foreground">
+                Visit <a href="https://colorhunt.co/palettes/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">colorhunt.co/palettes</a>. Find a color you like and think will match the aesthetics of the page. Click the hexcode to copy it (ex: FFB4A2).
               </p>
-              <p className="text-sm text-white/80">
+              <p className="text-sm text-muted-foreground">
                 Paste it in this box:
               </p>
               <div className="flex gap-2">
@@ -604,11 +604,11 @@ export default function AestheticsPage() {
                     let value = e.target.value.replace('#', '');
                     setCreateLabelCustomColorInput(value);
                   }}
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-muted border-border"
                   placeholder="Enter hex color (ex: FFB4A2)"
                 />
                 <div 
-                  className="w-10 h-10 rounded-lg border border-white/20"
+                  className="w-10 h-10 rounded-lg border border-border"
                   style={{ backgroundColor: `#${createLabelCustomColorInput}` }}
                 />
               </div>
@@ -616,7 +616,7 @@ export default function AestheticsPage() {
                 <Button
                   variant="outline"
                   onClick={() => setIsCreateLabelCustomColorDialogOpen(false)}
-                  className="bg-transparent border-slate-700 hover:bg-slate-800"
+                  className="bg-transparent border-border hover:bg-muted"
                 >
                   Cancel
                 </Button>
@@ -628,7 +628,7 @@ export default function AestheticsPage() {
                       setCreateLabelCustomColorInput("");
                     }
                   }}
-                  className="bg-slate-800 hover:bg-slate-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={!createLabelCustomColorInput.match(/^[0-9A-Fa-f]{6}$/)}
                 >
                   Apply Color
@@ -649,13 +649,13 @@ const Logo = () => {
   return (
     <Link
       href="/"
-      className="font-normal flex space-x-2 items-center text-sm text-white py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-foreground py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <div className="h-5 w-6 bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium text-white whitespace-pre"
+        className="font-medium whitespace-pre"
       >
         Too-Doo
       </motion.span>
