@@ -154,6 +154,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                       dueDate={note.due_date}
                       onDelete={onDelete}
                       is_list={note.is_list}
+                      isCompleted={true}
                     />
                   ))}
               </div>
@@ -199,6 +200,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                               dueDate={note.due_date}
                               onDelete={onDelete}
                               is_list={note.is_list}
+                              isCompleted={true}
                             />
                           </div>
                         </motion.div>

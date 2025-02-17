@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Pencil, Trash2, Square, CheckSquare } from "lucide-react";
+import { Check, Pencil, Trash2, Square, CheckSquare, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -46,9 +46,10 @@ interface NoteCardProps {
   onDelete?: () => void;
   isPriority?: boolean;
   is_list?: boolean;
+  isCompleted?: boolean;
 }
 
-export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false, is_list = false }: NoteCardProps) {
+export function NoteCard({ id, title, description, className, label, dueDate, onDelete, isPriority = false, is_list = false, isCompleted = false }: NoteCardProps) {
   const supabase = createClientComponentClient();
   const [isDeleted, setIsDeleted] = useState(false);
   const { toast } = useToast();
@@ -171,6 +172,33 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
       toast({
         title: "Error",
         description: "Failed to complete note",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRevert = async () => {
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .update({ 
+          is_completed: false,
+          completed_at: null
+        })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      onDelete?.(); // Refresh the notes list
+      toast({
+        description: "Note reverted to active",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error reverting note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to revert note",
         variant: "destructive"
       });
     }
@@ -386,12 +414,16 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
             "transform-gpu translate-y-10"
           )}
         >
-          {/* Left side - Complete button */}
+          {/* Left side - Complete/Revert button */}
           <div 
-            onClick={handleComplete}
+            onClick={isCompleted ? handleRevert : handleComplete}
             className="pointer-events-auto cursor-pointer rounded-lg p-2 transition-colors hover:bg-foreground/10"
           >
-            <Check className="w-5 h-5 text-foreground" strokeWidth={2} />
+            {isCompleted ? (
+              <RotateCcw className="w-5 h-5 text-foreground" strokeWidth={2} />
+            ) : (
+              <Check className="w-5 h-5 text-foreground" strokeWidth={2} />
+            )}
           </div>
 
           {/* Right side - Edit and Delete buttons */}
