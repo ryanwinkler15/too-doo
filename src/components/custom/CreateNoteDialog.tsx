@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, CheckSquare, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, CheckSquare, Plus, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -32,6 +32,9 @@ import {
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { toast } from "sonner";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const colors = [
   { value: '#CB9DF0', label: 'Purple' },
@@ -77,6 +80,52 @@ interface CreateNoteDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+interface SortableItemProps {
+  id: string;
+  item: ListItem;
+  index: number;
+  onChange: (id: string, text: string) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, id: string) => void;
+}
+
+function SortableItem({ id, item, index, onChange, onKeyDown }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-2 group">
+      <div 
+        {...attributes} 
+        {...listeners}
+        className="w-6 h-6 flex items-center justify-center text-white/50 hover:text-white/90 transition-colors cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4" />
+      </div>
+      <div className="w-6 h-6 flex items-center justify-center">
+        <Plus className="w-4 h-4 text-muted-foreground" />
+      </div>
+      <Input
+        id={`list-item-${item.id}`}
+        value={item.text}
+        onChange={(e) => onChange(item.id, e.target.value)}
+        onKeyDown={(e) => onKeyDown(e, item.id)}
+        placeholder={index === 0 ? "List item" : ""}
+        className="bg-transparent border-none focus:ring-0 placeholder-muted-foreground"
+      />
+    </div>
+  );
+}
+
 export function CreateNoteDialog({ 
   onNoteCreated, 
   mode = 'create', 
@@ -102,6 +151,13 @@ export function CreateNoteDialog({
   const [listItems, setListItems] = useState<ListItem[]>([{ id: '1', text: '', isCompleted: false }]);
   
   const supabase = createClientComponentClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Effect to handle form state based on mode and dialog open state
   useEffect(() => {
@@ -408,6 +464,23 @@ export function CreateNoteDialog({
     }
   };
 
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      setListItems((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        
+        const newItems = [...items];
+        const [movedItem] = newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, movedItem);
+        
+        return newItems;
+      });
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
@@ -449,21 +522,27 @@ export function CreateNoteDialog({
               
               {isListMode ? (
                 <div className="space-y-2 bg-background rounded-md border border-border p-2">
-                  {listItems.map((item, index) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <div className="w-6 h-6 flex items-center justify-center">
-                        <Plus className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <Input
-                        id={`list-item-${item.id}`}
-                        value={item.text}
-                        onChange={(e) => handleListItemChange(item.id, e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(e, item.id)}
-                        placeholder={index === 0 ? "List item" : ""}
-                        className="bg-transparent border-none focus:ring-0 placeholder-muted-foreground"
-                      />
-                    </div>
-                  ))}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={listItems.map(item => item.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {listItems.map((item, index) => (
+                        <SortableItem
+                          key={item.id}
+                          id={item.id}
+                          item={item}
+                          index={index}
+                          onChange={handleListItemChange}
+                          onKeyDown={handleKeyDown}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                 </div>
               ) : (
                 <Textarea
