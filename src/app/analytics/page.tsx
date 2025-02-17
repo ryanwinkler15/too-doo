@@ -9,6 +9,12 @@ import { Bar, BarChart, XAxis, Tooltip, Legend } from "recharts";
 import { StreakDisplay } from "@/components/custom/StreakDisplay";
 import { FocusAreaCharts } from "@/components/custom/FocusAreaCharts";
 import { navItems } from "@/lib/navigation";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type TimeFrame = '1 week' | '1 month' | '3 months';
 
 interface ActivityData {
   day: string;
@@ -19,6 +25,7 @@ interface ActivityData {
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState("Analytics");
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState<TimeFrame>('1 week');
   const supabase = createClientComponentClient();
 
   // Fetch activity data
@@ -29,52 +36,146 @@ export default function AnalyticsPage() {
         if (userError) throw userError;
         if (!user) throw new Error('No user found');
 
-        // Get the last 7 days
-        const dates = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return date;
-        });
+        let chartData: ActivityData[] = [];
 
-        // Format dates for display and query
-        const formattedDates = dates.map(date => ({
-          display: date.toLocaleDateString('en-US', { weekday: 'short' }),
-          start: new Date(date.setHours(0, 0, 0, 0)).toISOString(),
-          end: new Date(date.setHours(23, 59, 59, 999)).toISOString(),
-          isToday: new Date().toDateString() === date.toDateString()
-        }));
+        if (selectedTimeFrame === '1 month') {
+          // Get 5 weekly sections
+          const weeklySections = Array.from({ length: 5 }, (_, i) => {
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() - (i * 7));
+            endDate.setHours(23, 59, 59, 999);
+            
+            const startDate = new Date(endDate);
+            startDate.setDate(endDate.getDate() - 6);
+            startDate.setHours(0, 0, 0, 0);
+            
+            return { startDate, endDate };
+          });
 
-        // Fetch data for each day
-        const activityPromises = formattedDates.map(async ({ start, end }) => {
-          const [createdRes, completedRes] = await Promise.all([
-            supabase
-              .from('notes')
-              .select('id', { count: 'exact' })
-              .eq('user_id', user.id)
-              .gte('created_at', start)
-              .lte('created_at', end),
-            supabase
-              .from('notes')
-              .select('id', { count: 'exact' })
-              .eq('user_id', user.id)
-              .gte('completed_at', start)
-              .lte('completed_at', end)
-          ]);
+          // Fetch data for each weekly section
+          const weeklyDataPromises = weeklySections.map(async ({ startDate, endDate }, index) => {
+            const [createdRes, completedRes] = await Promise.all([
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('created_at', startDate.toISOString())
+                .lt('created_at', endDate.toISOString()),
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('completed_at', startDate.toISOString())
+                .lt('completed_at', endDate.toISOString())
+            ]);
 
-          return {
-            created: createdRes.count || 0,
-            completed: completedRes.count || 0
-          };
-        });
+            const weekLabels = [
+              'This Week',
+              'Last Week',
+              '2 Weeks Ago',
+              '3 Weeks Ago',
+              '4 Weeks Ago'
+            ];
 
-        const activityCounts = await Promise.all(activityPromises);
+            return {
+              day: weekLabels[index],
+              created: createdRes.count || 0,
+              completed: completedRes.count || 0,
+              order: index // Add order to maintain sequence
+            };
+          });
 
-        // Combine the data
-        const chartData = formattedDates.map((date, index) => ({
-          day: date.display + (date.isToday ? ' (Today)' : ''),
-          created: activityCounts[index].created,
-          completed: activityCounts[index].completed
-        }));
+          chartData = (await Promise.all(weeklyDataPromises))
+            .sort((a, b) => a.order - b.order) // Sort by order
+            .map(({ day, created, completed }) => ({ day, created, completed })); // Remove order from final data
+        } else if (selectedTimeFrame === '1 week') {
+          // Existing weekly view logic
+          const dates = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (6 - i));
+            return date;
+          });
+
+          const formattedDates = dates.map(date => ({
+            display: date.toLocaleDateString('en-US', { weekday: 'short' }),
+            start: new Date(date.setHours(0, 0, 0, 0)).toISOString(),
+            end: new Date(date.setHours(23, 59, 59, 999)).toISOString(),
+            isToday: new Date().toDateString() === date.toDateString()
+          }));
+
+          const activityPromises = formattedDates.map(async ({ start, end, display, isToday }) => {
+            const [createdRes, completedRes] = await Promise.all([
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('created_at', start)
+                .lte('created_at', end),
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('completed_at', start)
+                .lte('completed_at', end)
+            ]);
+
+            return {
+              day: display + (isToday ? ' (Today)' : ''),
+              created: createdRes.count || 0,
+              completed: completedRes.count || 0
+            };
+          });
+
+          chartData = await Promise.all(activityPromises);
+        } else {
+          // 3 months view - 6 two-week blocks
+          const twoWeekSections = Array.from({ length: 6 }, (_, i) => {
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() - (i * 14));
+            endDate.setHours(23, 59, 59, 999);
+            
+            const startDate = new Date(endDate);
+            startDate.setDate(endDate.getDate() - 13);
+            startDate.setHours(0, 0, 0, 0);
+            
+            return { startDate, endDate };
+          });
+
+          // Fetch data for each two-week section
+          const twoWeekDataPromises = twoWeekSections.map(async ({ startDate, endDate }, index) => {
+            const [createdRes, completedRes] = await Promise.all([
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('created_at', startDate.toISOString())
+                .lt('created_at', endDate.toISOString()),
+              supabase
+                .from('notes')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .gte('completed_at', startDate.toISOString())
+                .lt('completed_at', endDate.toISOString())
+            ]);
+
+            // Format the end date (which is the label date) as M/D
+            const labelDate = endDate.toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric'
+            });
+
+            return {
+              day: labelDate,
+              created: createdRes.count || 0,
+              completed: completedRes.count || 0,
+              order: index
+            };
+          });
+
+          chartData = (await Promise.all(twoWeekDataPromises))
+            .sort((a, b) => a.order - b.order)
+            .map(({ day, created, completed }) => ({ day, created, completed }));
+        }
 
         setActivityData(chartData);
       } catch (error) {
@@ -83,7 +184,7 @@ export default function AnalyticsPage() {
     };
 
     fetchActivityData();
-  }, [supabase]);
+  }, [supabase, selectedTimeFrame]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -126,13 +227,50 @@ export default function AnalyticsPage() {
 
             {/* Recent Activity Chart */}
             <div className="h-[300px] bg-card rounded-xl p-6 border border-border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
-              <h2 className="text-2xl font-semibold">Recent Activity</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Recent Activity</h2>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className={cn(
+                        "w-[110px] justify-between",
+                        "bg-background/50 border-border/50 hover:bg-background/80"
+                      )}
+                    >
+                      {selectedTimeFrame}
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-[110px] p-0" 
+                    align="end"
+                  >
+                    <div className="flex flex-col">
+                      {(['1 week', '1 month', '3 months'] as TimeFrame[]).map((timeFrame) => (
+                        <Button
+                          key={timeFrame}
+                          variant={selectedTimeFrame === timeFrame ? "secondary" : "ghost"}
+                          className="justify-center rounded-none first:rounded-t-md last:rounded-b-md"
+                          onClick={() => {
+                            setSelectedTimeFrame(timeFrame);
+                          }}
+                        >
+                          {timeFrame}
+                        </Button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <div className="h-[250px] mt-4">
                 <BarChart 
                   data={activityData} 
                   margin={{ top: 32, right: 10, left: 10, bottom: 16 }}
                   width={500}
                   height={230}
+                  barGap={0}
                 >
                   <XAxis
                     dataKey="day"
@@ -141,6 +279,7 @@ export default function AnalyticsPage() {
                     tickMargin={8}
                     fontSize={12}
                     stroke="currentColor"
+                    interval={0}
                   />
                   <Tooltip
                     cursor={false}
