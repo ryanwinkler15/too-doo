@@ -49,7 +49,7 @@ export function StreakDisplay({ size = 'lg', className }: StreakDisplayProps) {
   const sizeClasses = {
     sm: {
       container: "h-1",
-      flame: "w-32 h-32",
+      flame: "w-28 h-28",
       number: "text-5xl translate-y-3",
       text: "text-2xl translate-y-3"
     },

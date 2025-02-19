@@ -124,12 +124,12 @@ export default function Home() {
       </div>
       
       {/* Streak Display */}
-      <div className="mb-2 ml-2 mt-12">
+      <div className="mb-1 ml-2 mt-12">
         <StreakDisplay size="sm" />
       </div>
       
       {/* Action Buttons */}
-      <div className="flex justify-end mb-8">
+      <div className="flex justify-end mb-4">
         <div className="flex gap-4">
           <Button 
             variant="outline" 
