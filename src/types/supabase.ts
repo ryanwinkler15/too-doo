@@ -23,6 +23,7 @@ export interface Database {
           completed_at: string | null
           is_priority: boolean
           is_list: boolean
+          position: number | null
         }
         Insert: {
           id?: string
@@ -37,6 +38,7 @@ export interface Database {
           completed_at?: string | null
           is_priority?: boolean
           is_list?: boolean
+          position?: number | null
         }
         Update: {
           id?: string
@@ -51,6 +53,7 @@ export interface Database {
           completed_at?: string | null
           is_priority?: boolean
           is_list?: boolean
+          position?: number | null
         }
       }
       labels: {

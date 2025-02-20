@@ -42,7 +42,16 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
     const newGroups = Object.entries(groupedNotes)
       .map(([name, group]) => ({
         name,
-        ...group
+        label: group.label,
+        // Sort notes by position (lowest first), then by created_at for any without position
+        notes: group.notes.sort((a, b) => {
+          // If both notes have positions, sort by position
+          if (typeof a.position === 'number' && typeof b.position === 'number') {
+            return a.position - b.position;
+          }
+          // If either note doesn't have a position, sort by created_at (newest first)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        })
       }))
       .sort((a, b) => {
         // Put Uncategorized at the end
@@ -69,7 +78,7 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
         axis="x" 
         values={labelGroups} 
         onReorder={setLabelGroups}
-        className="flex items-start gap-6 min-w-max px-4"
+        className="flex items-start gap-3 min-w-max px-4"
       >
         <AnimatePresence>
           {labelGroups.map((group) => (

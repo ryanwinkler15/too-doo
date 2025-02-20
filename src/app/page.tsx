@@ -171,6 +171,8 @@ export default function Home() {
           due_date,
           is_priority,
           is_list,
+          position,
+          created_at,
           label:label_id (
             id,
             name,
@@ -193,8 +195,14 @@ export default function Home() {
       // Sort by due date if enabled
       if (sortByDueDate) {
         query = query.order('due_date', { ascending: true, nullsFirst: false });
+      } else if (viewMode === 'label') {
+        // When in label view, order by position within each label group
+        query = query
+          .order('is_priority', { ascending: false }) // Priority notes first
+          .order('position', { ascending: true }) // Then by position
+          .order('created_at', { ascending: true }); // Finally by creation date as fallback
       } else {
-        // Default sorting: Priority first, then chronological within each group
+        // Default sorting for task view: Priority first, then by due date
         query = query
           .order('is_priority', { ascending: false }) // Priority notes first
           .order('due_date', { ascending: true, nullsFirst: false }); // Then by due date

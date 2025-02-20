@@ -9,7 +9,7 @@ import { CollapsibleListNote } from "./CollapsibleListNote";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 
 interface LabelCardProps {
@@ -48,12 +48,12 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
       style={style}
       className="flex items-start gap-3 py-2 px-4 hover:bg-black/5 dark:hover:bg-white/5 group transition-colors duration-200"
     >
-      <div {...attributes} {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing mt-[14px]">
+      <div {...attributes} {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing mt-3.5">
         <GripVertical className="w-4 h-4 text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80" />
       </div>
       <button
         onClick={() => onComplete(note.id)}
-        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-[14px]"
+        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-3.5"
       >
         <Square className="w-4 h-4 text-black dark:text-white" />
       </button>
@@ -67,12 +67,12 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
               onUpdate={onDelete}
             />
           ) : (
-            <div className="flex flex-col justify-center min-h-[44px]">
-              <span className="text-base text-black dark:text-white break-words">
+            <div className="flex flex-col justify-start min-h-[44px] py-2">
+              <span className="text-base text-black dark:text-white break-words leading-normal">
                 {note.title}
               </span>
               {note.description && (
-                <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap mt-1">
+                <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap mt-1.5">
                   {note.description}
                 </p>
               )}
@@ -80,7 +80,7 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
           )}
         </div>
         {formattedDueDate && (
-          <div className="flex-shrink-0 mt-[14px]">
+          <div className="flex-shrink-0 mt-3.5">
             <div className="px-2 py-1 rounded-full bg-black/10 dark:bg-white/10 text-xs font-medium text-black dark:text-white">
               {formattedDueDate}
             </div>
@@ -93,13 +93,20 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
 
 export function LabelCard({ 
   label, 
-  notes, 
+  notes: initialNotes, 
   onDelete,
   onLineItemDragStart,
   onLineItemDragEnd 
 }: LabelCardProps) {
   const supabase = createClientComponentClient();
   const { toast } = useToast();
+  // Keep a local copy of notes for optimistic updates
+  const [notes, setNotes] = useState(initialNotes);
+
+  // Update local notes when prop changes
+  useEffect(() => {
+    setNotes(initialNotes);
+  }, [initialNotes]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -121,15 +128,34 @@ export function LabelCard({
       const oldIndex = notes.findIndex(note => note.id === active.id);
       const newIndex = notes.findIndex(note => note.id === over.id);
       
-      // Instead of managing state internally, we'll notify the parent
+      // Optimistically update the UI
+      const newNotes = [...notes];
+      const [movedItem] = newNotes.splice(oldIndex, 1);
+      newNotes.splice(newIndex, 0, movedItem);
+      setNotes(newNotes);
+      
       try {
-        // Here you would typically call a prop function to update the order
-        // For now, just show the toast
-        toast({
-          description: "Note order updated",
-          variant: "default"
-        });
+        // Get all notes that need position updates
+        const start = Math.min(oldIndex, newIndex);
+        const end = Math.max(oldIndex, newIndex);
+        const affectedNotes = newNotes.slice(start, end + 1);
+        
+        // Update all affected notes with their new positions
+        const updates = affectedNotes.map((note, i) => 
+          supabase
+            .from('notes')
+            .update({ position: start + i + 1 })
+            .eq('id', note.id)
+        );
+        
+        // Wait for all updates to complete
+        await Promise.all(updates);
+        
+        // Only refresh the full list after all updates are done
+        onDelete?.();
       } catch (error) {
+        // If there's an error, revert the optimistic update
+        setNotes(initialNotes);
         console.error('Error updating note order:', error);
         toast({
           title: "Error",
@@ -169,7 +195,7 @@ export function LabelCard({
 
   return (
     <div 
-      className="w-[450px] shrink-0 rounded-xl overflow-hidden"
+      className="w-[465px] shrink-0 rounded-xl overflow-hidden"
       style={{
         backgroundColor: label?.color || 'rgb(30 41 59)',
       }}
