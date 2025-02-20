@@ -64,16 +64,16 @@ export function CollapsibleListNote({ id, title, items, onUpdate }: CollapsibleL
   };
 
   return (
-    <div className="border-b border-border/10 last:border-b-0">
+    <div className="w-full">
       {/* Header */}
       <div 
-        className="flex items-center justify-between py-2 px-4 cursor-pointer hover:bg-foreground/5"
+        className="flex items-center justify-between py-2 pr-4 cursor-pointer hover:bg-white/5"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="font-medium">{title}</span>
+        <span className="text-base text-white">{title}</span>
         <ChevronDown 
           className={cn(
-            "w-5 h-5 transition-transform duration-200",
+            "w-5 h-5 text-white transition-transform duration-200",
             isExpanded && "transform rotate-180"
           )} 
         />
@@ -86,28 +86,28 @@ export function CollapsibleListNote({ id, title, items, onUpdate }: CollapsibleL
           isExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className="px-8 py-2 space-y-2">
+        <div className="pl-6 pr-4 py-2 space-y-2">
           {items.map((item, index) => (
             <div 
               key={index}
-              className="flex items-center gap-2 group hover:bg-foreground/5 rounded-lg p-1"
+              className="flex items-start gap-3 group hover:bg-white/5 rounded-lg p-1"
             >
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleItem(index);
                 }}
-                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-foreground/20 rounded hover:opacity-80"
+                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80 mt-0.5"
               >
                 {item.isCompleted ? (
-                  <CheckSquare className="w-4 h-4 text-foreground" />
+                  <CheckSquare className="w-4 h-4 text-white" />
                 ) : (
-                  <Square className="w-4 h-4 text-foreground" />
+                  <Square className="w-4 h-4 text-white" />
                 )}
               </button>
               <span className={cn(
-                "text-sm break-words flex-1",
-                item.isCompleted && "line-through text-foreground/50"
+                "text-base text-white break-words flex-1",
+                item.isCompleted && "line-through text-white/50"
               )}>
                 {item.text}
               </span>

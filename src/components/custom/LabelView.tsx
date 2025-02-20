@@ -44,7 +44,7 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
         className
       )}
     >
-      <div className="flex gap-6 min-w-max px-4">
+      <div className="flex items-start gap-6 min-w-max px-4">
         {labelGroups.map((group) => (
           <LabelCard
             key={group.name}

@@ -63,7 +63,7 @@ export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
       {/* Label Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-white break-words">
+          <h3 className="text-2xl font-bold text-white break-words">
             {label?.name || 'Uncategorized'}
           </h3>
         </div>
@@ -77,13 +77,22 @@ export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
         {notes.map((note) => (
           note.is_list ? (
             // Render list notes with CollapsibleListNote
-            <CollapsibleListNote
-              key={note.id}
-              id={note.id}
-              title={note.title}
-              items={JSON.parse(note.description)}
-              onUpdate={onDelete}
-            />
+            <div key={note.id} className="flex items-start gap-3 group">
+              <button
+                onClick={() => handleComplete(note.id)}
+                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80 mt-[14px] ml-4"
+              >
+                <Square className="w-4 h-4 text-white" />
+              </button>
+              <div className="flex-1">
+                <CollapsibleListNote
+                  id={note.id}
+                  title={note.title}
+                  items={JSON.parse(note.description)}
+                  onUpdate={onDelete}
+                />
+              </div>
+            </div>
           ) : (
             // Render regular notes as single line items
             <div 
@@ -97,7 +106,7 @@ export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
                 <Square className="w-4 h-4 text-white" />
               </button>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm text-white break-words">
+                <h4 className="text-base text-white break-words">
                   {note.title}
                 </h4>
                 {note.description && (
@@ -110,6 +119,8 @@ export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
           )
         ))}
       </div>
+      {/* Bottom Padding */}
+      <div className="h-4" />
     </div>
   );
 } 
