@@ -176,7 +176,8 @@ export default function Home() {
           label:label_id (
             id,
             name,
-            color
+            color,
+            position
           )
         `)
         .eq('is_completed', false)
@@ -196,11 +197,18 @@ export default function Home() {
       if (sortByDueDate) {
         query = query.order('due_date', { ascending: true, nullsFirst: false });
       } else if (viewMode === 'label') {
-        // When in label view, order by position within each label group
+        // When in label view, first get labels ordered by position
+        const { data: labels, error: labelError } = await supabase
+          .from('labels')
+          .select('id, position')
+          .order('position', { ascending: true });
+          
+        if (labelError) throw labelError;
+        
+        // Then order notes within each label
         query = query
           .order('is_priority', { ascending: false }) // Priority notes first
-          .order('position', { ascending: true }) // Then by position
-          .order('created_at', { ascending: true }); // Finally by creation date as fallback
+          .order('position', { ascending: true }); // Then by position
       } else {
         // Default sorting for task view: Priority first, then by due date
         query = query
