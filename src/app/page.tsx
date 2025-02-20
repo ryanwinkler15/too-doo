@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CreateNoteDialog } from "@/components/custom/CreateNoteDialog";
 import { NoteGrid } from "@/components/custom/NoteGrid";
 import { getSupabaseClient } from '@/lib/supabase-client';
-import { Plus, Star, AlignJustify } from "lucide-react";
+import { Plus, Star, AlignJustify, LayoutGrid, ListFilter } from "lucide-react";
 import { Note } from "@/lib/types";
 import Link from "next/link";
 import { OrganizeMenu } from "@/components/custom/OrganizeMenu";
@@ -13,6 +13,7 @@ import { NavBar } from "@/components/ui/tubelight-navbar";
 import { cn } from "@/lib/utils";
 import { navItems } from "@/lib/navigation";
 import { StreakDisplay } from "@/components/custom/StreakDisplay";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -22,6 +23,7 @@ export default function Home() {
   const [showPriorityOnly, setShowPriorityOnly] = useState(false);
   const [sortByDueDate, setSortByDueDate] = useState(false);
   const [activeTab, setActiveTab] = useState("Active");
+  const [viewMode, setViewMode] = useState<'task' | 'label'>('task');
   const supabase = getSupabaseClient();
 
   const fetchNotes = async () => {
@@ -129,8 +131,74 @@ export default function Home() {
       </div>
       
       {/* Action Buttons */}
-      <div className="flex justify-end mb-4">
-        <div className="flex gap-4">
+      <div className="flex justify-between items-center mb-4">
+        {/* Empty left space to balance layout */}
+        <div className="w-[200px]"></div>
+
+        {/* View Toggle - Centered */}
+        <div className="relative">
+          <div className="relative rounded-full border border-border bg-background px-1.5 py-1.5 shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('task')}
+                className={cn(
+                  "relative rounded-full px-3 py-1.5 text-sm font-bold outline-2 outline-sky-400 transition focus-visible:outline",
+                  "text-black dark:text-foreground hover:text-black dark:hover:text-foreground"
+                )}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                {viewMode === 'task' && (
+                  <motion.div
+                    layoutId="view-toggle-bubble"
+                    className="absolute inset-0 bg-primary/10 dark:bg-primary/20 border-border"
+                    style={{ borderRadius: 9999 }}
+                    transition={{
+                      type: "spring",
+                      bounce: 0.2,
+                      duration: 0.6,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <LayoutGrid className="w-4 h-4" />
+                  Task View
+                </span>
+              </button>
+              <button
+                onClick={() => setViewMode('label')}
+                className={cn(
+                  "relative rounded-full px-3 py-1.5 text-sm font-bold outline-2 outline-sky-400 transition focus-visible:outline",
+                  "text-black dark:text-foreground hover:text-black dark:hover:text-foreground"
+                )}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                {viewMode === 'label' && (
+                  <motion.div
+                    layoutId="view-toggle-bubble"
+                    className="absolute inset-0 bg-primary/10 dark:bg-primary/20 border-border"
+                    style={{ borderRadius: 9999 }}
+                    transition={{
+                      type: "spring",
+                      bounce: 0.2,
+                      duration: 0.6,
+                    }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <ListFilter className="w-4 h-4" />
+                  Label View
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons - Right */}
+        <div className="flex gap-4 w-[200px] justify-end">
           <Button 
             variant="outline" 
             onClick={() => setIsCreating(true)}
