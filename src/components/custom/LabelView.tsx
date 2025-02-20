@@ -16,7 +16,7 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
     const labelName = note.label?.name || 'Uncategorized';
     if (!acc[labelName]) {
       acc[labelName] = {
-        label: note.label,
+        label: note.label || null,
         notes: []
       };
     }
@@ -40,11 +40,11 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
   return (
     <div 
       className={cn(
-        "w-full overflow-x-auto scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent",
+        "w-full overflow-x-auto scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent pb-4",
         className
       )}
     >
-      <div className="flex gap-4 min-w-max p-4">
+      <div className="flex gap-6 min-w-max px-4">
         {labelGroups.map((group) => (
           <LabelCard
             key={group.name}
