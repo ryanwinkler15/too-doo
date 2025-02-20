@@ -3,7 +3,7 @@
 import { Note, Label } from "@/lib/types";
 import { LabelCard } from "./LabelCard";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 
 interface LabelViewProps {
@@ -19,35 +19,40 @@ interface LabelGroup {
 }
 
 export function LabelView({ notes, onDelete, className }: LabelViewProps) {
-  // Group notes by label
-  const groupedNotes = notes.reduce((acc, note) => {
-    const labelName = note.label?.name || 'Uncategorized';
-    if (!acc[labelName]) {
-      acc[labelName] = {
-        label: note.label || null,
-        notes: []
-      };
-    }
-    acc[labelName].notes.push(note);
-    return acc;
-  }, {} as Record<string, { label: Label | null, notes: Note[] }>);
-
-  // Convert to array and sort initially
-  const initialGroups = Object.entries(groupedNotes)
-    .map(([name, group]) => ({
-      name,
-      ...group
-    }))
-    .sort((a, b) => {
-      // Put Uncategorized at the end
-      if (a.name === 'Uncategorized') return 1;
-      if (b.name === 'Uncategorized') return -1;
-      return a.name.localeCompare(b.name);
-    });
-
-  // State for maintaining order
-  const [labelGroups, setLabelGroups] = useState<LabelGroup[]>(initialGroups);
+  // Move the grouping logic into a useEffect to update when notes change
+  const [labelGroups, setLabelGroups] = useState<LabelGroup[]>([]);
   const [isDraggingLineItem, setIsDraggingLineItem] = useState(false);
+
+  // Update groups when notes change
+  useEffect(() => {
+    // Group notes by label
+    const groupedNotes = notes.reduce((acc, note) => {
+      const labelName = note.label?.name || 'Uncategorized';
+      if (!acc[labelName]) {
+        acc[labelName] = {
+          label: note.label || null,
+          notes: []
+        };
+      }
+      acc[labelName].notes.push(note);
+      return acc;
+    }, {} as Record<string, { label: Label | null, notes: Note[] }>);
+
+    // Convert to array and sort
+    const newGroups = Object.entries(groupedNotes)
+      .map(([name, group]) => ({
+        name,
+        ...group
+      }))
+      .sort((a, b) => {
+        // Put Uncategorized at the end
+        if (a.name === 'Uncategorized') return 1;
+        if (b.name === 'Uncategorized') return -1;
+        return a.name.localeCompare(b.name);
+      });
+
+    setLabelGroups(newGroups);
+  }, [notes]);
 
   // Event handlers for line item drag state
   const handleLineItemDragStart = () => setIsDraggingLineItem(true);

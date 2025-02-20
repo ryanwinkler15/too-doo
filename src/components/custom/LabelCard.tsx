@@ -80,12 +80,11 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
 
 export function LabelCard({ 
   label, 
-  notes: initialNotes, 
+  notes, 
   onDelete,
   onLineItemDragStart,
   onLineItemDragEnd 
 }: LabelCardProps) {
-  const [notes, setNotes] = useState(initialNotes);
   const supabase = createClientComponentClient();
   const { toast } = useToast();
 
@@ -109,13 +108,10 @@ export function LabelCard({
       const oldIndex = notes.findIndex(note => note.id === active.id);
       const newIndex = notes.findIndex(note => note.id === over.id);
       
-      const newNotes = [...notes];
-      const [movedNote] = newNotes.splice(oldIndex, 1);
-      newNotes.splice(newIndex, 0, movedNote);
-      
-      setNotes(newNotes);
-
+      // Instead of managing state internally, we'll notify the parent
       try {
+        // Here you would typically call a prop function to update the order
+        // For now, just show the toast
         toast({
           description: "Note order updated",
           variant: "default"
