@@ -67,13 +67,13 @@ export function CollapsibleListNote({ id, title, items, onUpdate }: CollapsibleL
     <div className="w-full">
       {/* Header */}
       <div 
-        className="flex items-center justify-between py-2 pr-4 cursor-pointer hover:bg-white/5"
+        className="flex items-center justify-between py-2 pr-4 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="text-base text-white">{title}</span>
+        <span className="text-base text-black dark:text-white">{title}</span>
         <ChevronDown 
           className={cn(
-            "w-5 h-5 text-white transition-transform duration-200",
+            "w-5 h-5 text-black dark:text-white transition-transform duration-200",
             isExpanded && "transform rotate-180"
           )} 
         />
@@ -90,24 +90,24 @@ export function CollapsibleListNote({ id, title, items, onUpdate }: CollapsibleL
           {items.map((item, index) => (
             <div 
               key={index}
-              className="flex items-start gap-3 group hover:bg-white/5 rounded-lg p-1"
+              className="flex items-start gap-3 group hover:bg-black/5 dark:hover:bg-white/5 rounded-lg p-1"
             >
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleItem(index);
                 }}
-                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-white/20 rounded hover:opacity-80 mt-0.5"
+                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-0.5"
               >
                 {item.isCompleted ? (
-                  <CheckSquare className="w-4 h-4 text-white" />
+                  <CheckSquare className="w-4 h-4 text-black dark:text-white" />
                 ) : (
-                  <Square className="w-4 h-4 text-white" />
+                  <Square className="w-4 h-4 text-black dark:text-white" />
                 )}
               </button>
               <span className={cn(
-                "text-base text-white break-words flex-1",
-                item.isCompleted && "line-through text-white/50"
+                "text-base text-black dark:text-white break-words flex-1",
+                item.isCompleted && "line-through text-black/50 dark:text-white/50"
               )}>
                 {item.text}
               </span>
