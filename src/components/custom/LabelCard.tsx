@@ -2,7 +2,7 @@
 
 import { Note } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Square, CheckSquare, GripVertical } from "lucide-react";
+import { Square, CheckSquare, GripVertical, ChevronDown } from "lucide-react";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from "@/hooks/use-toast";
 import { CollapsibleListNote } from "./CollapsibleListNote";
@@ -10,6 +10,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
+import { format } from 'date-fns';
 
 interface LabelCardProps {
   label: {
@@ -38,11 +39,14 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
     transition,
   };
 
+  // Format the due date if it exists
+  const formattedDueDate = note.due_date ? format(new Date(note.due_date), "MM/dd") : null;
+
   return (
     <div 
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-3 py-2 px-4 hover:bg-black/5 dark:hover:bg-white/5 group"
+      className="flex items-start gap-3 py-2 px-4 hover:bg-black/5 dark:hover:bg-white/5 group transition-colors duration-200"
     >
       <div {...attributes} {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing mt-[14px]">
         <GripVertical className="w-4 h-4 text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80" />
@@ -53,24 +57,33 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
       >
         <Square className="w-4 h-4 text-black dark:text-white" />
       </button>
-      <div className="flex-1 min-w-0">
-        {note.is_list ? (
-          <CollapsibleListNote
-            id={note.id}
-            title={note.title}
-            items={JSON.parse(note.description)}
-            onUpdate={onDelete}
-          />
-        ) : (
-          <div className="flex flex-col justify-center min-h-[44px]">
-            <span className="text-base text-black dark:text-white break-words">
-              {note.title}
-            </span>
-            {note.description && (
-              <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap mt-1">
-                {note.description}
-              </p>
-            )}
+      <div className="flex-1 min-w-0 flex justify-between items-start gap-4">
+        <div className="flex-1 min-w-0">
+          {note.is_list ? (
+            <CollapsibleListNote
+              id={note.id}
+              title={note.title}
+              items={JSON.parse(note.description)}
+              onUpdate={onDelete}
+            />
+          ) : (
+            <div className="flex flex-col justify-center min-h-[44px]">
+              <span className="text-base text-black dark:text-white break-words">
+                {note.title}
+              </span>
+              {note.description && (
+                <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap mt-1">
+                  {note.description}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+        {formattedDueDate && (
+          <div className="flex-shrink-0 mt-[14px]">
+            <div className="px-2 py-1 rounded-full bg-black/10 dark:bg-white/10 text-xs font-medium text-black dark:text-white">
+              {formattedDueDate}
+            </div>
           </div>
         )}
       </div>
