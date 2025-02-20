@@ -47,6 +47,11 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
 
   // State for maintaining order
   const [labelGroups, setLabelGroups] = useState<LabelGroup[]>(initialGroups);
+  const [isDraggingLineItem, setIsDraggingLineItem] = useState(false);
+
+  // Event handlers for line item drag state
+  const handleLineItemDragStart = () => setIsDraggingLineItem(true);
+  const handleLineItemDragEnd = () => setIsDraggingLineItem(false);
 
   return (
     <div 
@@ -66,28 +71,28 @@ export function LabelView({ notes, onDelete, className }: LabelViewProps) {
             <Reorder.Item
               key={group.name}
               value={group}
-              dragListener={true}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.1}
-              className="cursor-grab active:cursor-grabbing"
+              className="touch-none"
+              dragListener={!isDraggingLineItem}
               whileDrag={{
-                scale: 1.05,
+                scale: 1.02,
                 boxShadow: "0 5px 15px rgba(0,0,0,0.25)",
-                zIndex: 1
+                cursor: "grabbing"
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 30
+                bounce: 0.2,
+                duration: 0.6
               }}
             >
               <LabelCard
                 label={group.label}
                 notes={group.notes}
                 onDelete={onDelete}
+                onLineItemDragStart={handleLineItemDragStart}
+                onLineItemDragEnd={handleLineItemDragEnd}
               />
             </Reorder.Item>
           ))}

@@ -19,6 +19,8 @@ interface LabelCardProps {
   } | null;
   notes: Note[];
   onDelete?: () => void;
+  onLineItemDragStart?: () => void;
+  onLineItemDragEnd?: () => void;
 }
 
 // SortableNote component for individual notes
@@ -76,7 +78,13 @@ function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: 
   );
 }
 
-export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardProps) {
+export function LabelCard({ 
+  label, 
+  notes: initialNotes, 
+  onDelete,
+  onLineItemDragStart,
+  onLineItemDragEnd 
+}: LabelCardProps) {
   const [notes, setNotes] = useState(initialNotes);
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -88,7 +96,13 @@ export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardPro
     })
   );
 
+  const handleDragStart = () => {
+    onLineItemDragStart?.();
+  };
+
   const handleDragEnd = async (event: any) => {
+    onLineItemDragEnd?.();
+    
     const { active, over } = event;
     
     if (active.id !== over.id) {
@@ -101,10 +115,7 @@ export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardPro
       
       setNotes(newNotes);
 
-      // Update the order in the database
       try {
-        // Here you would typically update the order in your database
-        // For now, we'll just show a success toast
         toast({
           description: "Note order updated",
           variant: "default"
@@ -155,7 +166,7 @@ export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardPro
       }}
     >
       {/* Label Header */}
-      <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10 cursor-grab active:cursor-grabbing">
         <div className="flex-1 min-w-0">
           <h3 className="text-2xl font-bold text-black dark:text-white break-words">
             {label?.name || 'Uncategorized'}
@@ -167,27 +178,30 @@ export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardPro
       </div>
 
       {/* Notes List */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={notes.map(note => note.id)}
-          strategy={verticalListSortingStrategy}
+      <div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
         >
-          <div className="divide-y divide-black/10 dark:divide-white/10">
-            {notes.map((note) => (
-              <SortableNote
-                key={note.id}
-                note={note}
-                onComplete={handleComplete}
-                onDelete={onDelete}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={notes.map(note => note.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="divide-y divide-black/10 dark:divide-white/10">
+              {notes.map((note) => (
+                <SortableNote
+                  key={note.id}
+                  note={note}
+                  onComplete={handleComplete}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
       {/* Bottom Padding */}
       <div className="h-4" />
     </div>
