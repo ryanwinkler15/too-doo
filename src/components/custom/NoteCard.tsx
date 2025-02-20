@@ -297,7 +297,7 @@ export function NoteCard({ id, title, description, className, label, dueDate, on
     <>
       <div
         className={cn(
-          "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl h-[240px]",
+          "group relative col-span-1 flex flex-col justify-between overflow-hidden rounded-xl h-[200px]",
           cardStyle ? "" : "bg-slate-100 dark:bg-card",
           cardStyle ? "" : "border-border",
           "transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",

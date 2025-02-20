@@ -183,13 +183,14 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                           className="absolute inset-0 w-[400px] max-w-full h-[200px] origin-center"
                           style={{
                             transform: `translate(${xOffset}, ${yOffset})`,
-                            zIndex: 19 - index,
+                            zIndex: group.notes.length - index,
                           }}
                         >
-                          <div className="h-full w-full border border-slate-700/50 rounded-xl shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]"
+                          <div className="h-full w-full border border-slate-700/50 rounded-xl bg-blue-100/20"
                             style={{
                               backgroundColor: group.label.color || undefined,
-                              borderColor: "rgb(100, 116, 139)"
+                              borderColor: "rgb(100, 116, 139)",
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                             }}
                           >
                             <NoteCard
@@ -201,6 +202,7 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                               onDelete={onDelete}
                               is_list={note.is_list}
                               isCompleted={true}
+                              className="bg-purple-100/20"
                             />
                           </div>
                         </motion.div>
@@ -211,13 +213,14 @@ export function FannedNoteGrid({ notes, onDelete }: FannedNoteGridProps) {
                     <motion.div
                       className={cn(
                         "absolute inset-0 rounded-xl p-6 flex items-center justify-center",
-                        "border shadow-lg dark:shadow-[0_20px_35px_-20px_rgba(255,255,255,0.1)]",
+                        "border",
                         group.label.color ? "" : "bg-card"
                       )}
                       style={{
                         backgroundColor: group.label.color || undefined,
                         borderColor: "rgb(100, 116, 139)",
-                        zIndex: 20
+                        zIndex: group.notes.length + 1,
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                       }}
                     >
                       <h2 className="text-2xl font-bold text-foreground">
