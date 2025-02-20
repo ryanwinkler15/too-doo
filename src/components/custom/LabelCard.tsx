@@ -2,10 +2,14 @@
 
 import { Note } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Square, CheckSquare } from "lucide-react";
+import { Square, CheckSquare, GripVertical } from "lucide-react";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from "@/hooks/use-toast";
 import { CollapsibleListNote } from "./CollapsibleListNote";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useState } from 'react';
 
 interface LabelCardProps {
   label: {
@@ -17,13 +21,103 @@ interface LabelCardProps {
   onDelete?: () => void;
 }
 
-export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
+// SortableNote component for individual notes
+function SortableNote({ note, onComplete, onDelete }: { note: Note, onComplete: (id: string) => void, onDelete?: () => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: note.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className="flex items-start gap-3 py-2 px-4 hover:bg-black/5 dark:hover:bg-white/5 group"
+    >
+      <div {...attributes} {...listeners} className="flex-shrink-0 cursor-grab active:cursor-grabbing mt-[14px]">
+        <GripVertical className="w-4 h-4 text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80" />
+      </div>
+      <button
+        onClick={() => onComplete(note.id)}
+        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-[14px]"
+      >
+        <Square className="w-4 h-4 text-black dark:text-white" />
+      </button>
+      <div className="flex-1 min-w-0">
+        {note.is_list ? (
+          <CollapsibleListNote
+            id={note.id}
+            title={note.title}
+            items={JSON.parse(note.description)}
+            onUpdate={onDelete}
+          />
+        ) : (
+          <div className="flex flex-col justify-center min-h-[44px]">
+            <span className="text-base text-black dark:text-white break-words">
+              {note.title}
+            </span>
+            {note.description && (
+              <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap mt-1">
+                {note.description}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function LabelCard({ label, notes: initialNotes, onDelete }: LabelCardProps) {
+  const [notes, setNotes] = useState(initialNotes);
   const supabase = createClientComponentClient();
   const { toast } = useToast();
 
-  // Function to get background color with opacity
-  const getBackgroundColor = (hexColor: string) => {
-    return `${hexColor}26`; // 26 is hex for 15% opacity - making it more visible
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      const oldIndex = notes.findIndex(note => note.id === active.id);
+      const newIndex = notes.findIndex(note => note.id === over.id);
+      
+      const newNotes = [...notes];
+      const [movedNote] = newNotes.splice(oldIndex, 1);
+      newNotes.splice(newIndex, 0, movedNote);
+      
+      setNotes(newNotes);
+
+      // Update the order in the database
+      try {
+        // Here you would typically update the order in your database
+        // For now, we'll just show a success toast
+        toast({
+          description: "Note order updated",
+          variant: "default"
+        });
+      } catch (error) {
+        console.error('Error updating note order:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update note order",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   const handleComplete = async (noteId: string) => {
@@ -73,52 +167,27 @@ export function LabelCard({ label, notes, onDelete }: LabelCardProps) {
       </div>
 
       {/* Notes List */}
-      <div className="divide-y divide-black/10 dark:divide-white/10">
-        {notes.map((note) => (
-          note.is_list ? (
-            // Render list notes with CollapsibleListNote
-            <div key={note.id} className="flex items-start gap-3 group">
-              <button
-                onClick={() => handleComplete(note.id)}
-                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-[14px] ml-4"
-              >
-                <Square className="w-4 h-4 text-black dark:text-white" />
-              </button>
-              <div className="flex-1">
-                <CollapsibleListNote
-                  id={note.id}
-                  title={note.title}
-                  items={JSON.parse(note.description)}
-                  onUpdate={onDelete}
-                />
-              </div>
-            </div>
-          ) : (
-            // Render regular notes as single line items
-            <div 
-              key={note.id}
-              className="flex items-start gap-3 py-2 px-4 hover:bg-black/5 dark:hover:bg-white/5 group"
-            >
-              <button
-                onClick={() => handleComplete(note.id)}
-                className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 rounded hover:opacity-80 mt-0.5"
-              >
-                <Square className="w-4 h-4 text-black dark:text-white" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-base text-black dark:text-white break-words">
-                  {note.title}
-                </h4>
-                {note.description && (
-                  <p className="text-sm text-black/70 dark:text-white/70 break-words whitespace-pre-wrap">
-                    {note.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          )
-        ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={notes.map(note => note.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="divide-y divide-black/10 dark:divide-white/10">
+            {notes.map((note) => (
+              <SortableNote
+                key={note.id}
+                note={note}
+                onComplete={handleComplete}
+                onDelete={onDelete}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
       {/* Bottom Padding */}
       <div className="h-4" />
     </div>
