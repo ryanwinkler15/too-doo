@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { navItems } from "@/lib/navigation";
 import { StreakDisplay } from "@/components/custom/StreakDisplay";
 import { motion } from "framer-motion";
+import { LabelView } from "@/components/custom/LabelView";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -231,13 +232,20 @@ export default function Home() {
       </div>
       
       {/* Note Grid */}
-      <NoteGrid 
-        notes={notes} 
-        onDelete={fetchNotes} 
-        isSelectionMode={isSelectionMode} 
-        onExitSelectionMode={handleExitSelectionMode}
-        onPriorityChange={fetchNotes}
-      />
+      {viewMode === 'task' ? (
+        <NoteGrid 
+          notes={notes} 
+          onDelete={fetchNotes} 
+          isSelectionMode={isSelectionMode} 
+          onExitSelectionMode={handleExitSelectionMode}
+          onPriorityChange={fetchNotes}
+        />
+      ) : (
+        <LabelView
+          notes={notes}
+          onDelete={fetchNotes}
+        />
+      )}
     </div>
   );
 }

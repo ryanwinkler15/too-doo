@@ -10,4 +10,10 @@ export interface Note {
     name: string;
     color: string;
   } | null;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
 } 
