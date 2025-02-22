@@ -8,12 +8,19 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
+    
+    // Exchange the code for a session
     await supabase.auth.exchangeCodeForSession(code);
+    
+    // Track the login
+    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/track-login`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+      },
+    });
   }
 
-  // Get the origin from the request URL for dynamic redirect
-  const origin = requestUrl.origin;
-  
-  // Redirect to the home page using the origin
-  return NextResponse.redirect(`${origin}/`);
+  // URL to redirect to after sign in process completes
+  return NextResponse.redirect(new URL('/dashboard', request.url));
 } 

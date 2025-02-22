@@ -8,49 +8,75 @@ DROP FUNCTION IF EXISTS handle_note_completion();
 CREATE OR REPLACE FUNCTION handle_note_completion()
 RETURNS TRIGGER AS $$
 DECLARE
-    user_last_completion TIMESTAMPTZ;
+    last_completion TIMESTAMPTZ;
+    today_start TIMESTAMPTZ;
+    yesterday_start TIMESTAMPTZ;
+    has_completion_today BOOLEAN;
+    has_completion_yesterday BOOLEAN;
     current_user_streak INTEGER;
     current_longest_streak INTEGER;
 BEGIN
     -- Only proceed if is_completed changed from false to true
     IF (TG_OP = 'UPDATE' AND OLD.is_completed = false AND NEW.is_completed = true) THEN
-        -- Get the last completion date and current streak for this user
-        SELECT last_completion_date, current_streak, longest_streak
-        INTO user_last_completion, current_user_streak, current_longest_streak
+        -- Calculate today and yesterday's date boundaries
+        today_start := date_trunc('day', NOW());
+        yesterday_start := today_start - interval '1 day';
+        
+        -- Check if there are any completions today (including the current one)
+        SELECT EXISTS (
+            SELECT 1
+            FROM notes
+            WHERE user_id = NEW.user_id
+            AND is_completed = true
+            AND completed_at >= today_start
+            AND completed_at < today_start + interval '1 day'
+        ) INTO has_completion_today;
+        
+        -- Check if there were any completions yesterday
+        SELECT EXISTS (
+            SELECT 1
+            FROM notes
+            WHERE user_id = NEW.user_id
+            AND is_completed = true
+            AND completed_at >= yesterday_start
+            AND completed_at < today_start
+        ) INTO has_completion_yesterday;
+        
+        -- Get current streak info
+        SELECT current_streak, longest_streak, last_completion_date
+        INTO current_user_streak, current_longest_streak, last_completion
         FROM user_stats
         WHERE user_id = NEW.user_id;
-
-        IF user_last_completion IS NULL THEN
-            -- First completion ever
+        
+        -- Initialize if no previous stats
+        IF last_completion IS NULL THEN
             UPDATE user_stats
             SET current_streak = 1,
                 longest_streak = 1,
                 last_completion_date = NEW.completed_at
             WHERE user_id = NEW.user_id;
         ELSE
-            -- Update streaks based on completion pattern
-            IF date_trunc('day', user_last_completion) = date_trunc('day', NEW.completed_at) THEN
-                -- Another completion today
-                -- Keep current streak, but ensure it's at least 1
-                UPDATE user_stats
-                SET last_completion_date = NEW.completed_at,
-                    current_streak = GREATEST(1, current_user_streak),
-                    longest_streak = GREATEST(current_longest_streak, GREATEST(1, current_user_streak))
-                WHERE user_id = NEW.user_id;
-            ELSIF date_trunc('day', user_last_completion) = date_trunc('day', NEW.completed_at - interval '1 day') THEN
-                -- Completed yesterday, increment streak
-                UPDATE user_stats
-                SET current_streak = current_user_streak + 1,
-                    longest_streak = GREATEST(current_longest_streak, current_user_streak + 1),
-                    last_completion_date = NEW.completed_at
-                WHERE user_id = NEW.user_id;
+            -- If this is the first completion today
+            IF NOT has_completion_today THEN
+                IF has_completion_yesterday THEN
+                    -- Completed yesterday, increment streak
+                    UPDATE user_stats
+                    SET current_streak = current_user_streak + 1,
+                        longest_streak = GREATEST(current_longest_streak, current_user_streak + 1),
+                        last_completion_date = NEW.completed_at
+                    WHERE user_id = NEW.user_id;
+                ELSE
+                    -- No completion yesterday, reset streak to 1
+                    UPDATE user_stats
+                    SET current_streak = 1,
+                        longest_streak = GREATEST(current_longest_streak, 1),
+                        last_completion_date = NEW.completed_at
+                    WHERE user_id = NEW.user_id;
+                END IF;
             ELSE
-                -- Break in streak, reset to 1
-                -- But maintain the longest streak achieved
+                -- Already completed today, just update last_completion_date
                 UPDATE user_stats
-                SET current_streak = 1,
-                    longest_streak = GREATEST(current_longest_streak, 1),
-                    last_completion_date = NEW.completed_at
+                SET last_completion_date = GREATEST(last_completion, NEW.completed_at)
                 WHERE user_id = NEW.user_id;
             END IF;
         END IF;
@@ -65,7 +91,51 @@ CREATE TRIGGER on_note_completed
     FOR EACH ROW
     EXECUTE FUNCTION handle_note_completion();
 
--- Update existing user_stats to fix any incorrect longest_streak values
-UPDATE user_stats
-SET longest_streak = GREATEST(longest_streak, current_streak)
-WHERE longest_streak < current_streak;
+-- Add a function to recalculate streaks for all users
+CREATE OR REPLACE FUNCTION recalculate_all_streaks()
+RETURNS void AS $$
+DECLARE
+    user_record RECORD;
+    completion_dates DATE[];
+    current_date DATE;
+    streak_count INTEGER;
+    max_streak INTEGER;
+    last_completion TIMESTAMPTZ;
+BEGIN
+    FOR user_record IN SELECT DISTINCT user_id FROM notes WHERE is_completed = true LOOP
+        -- Get all completion dates for this user
+        SELECT ARRAY_AGG(DISTINCT date_trunc('day', completed_at)::date ORDER BY date_trunc('day', completed_at)::date)
+        INTO completion_dates
+        FROM notes
+        WHERE user_id = user_record.user_id AND is_completed = true;
+
+        IF array_length(completion_dates, 1) > 0 THEN
+            current_date := completion_dates[array_length(completion_dates, 1)];
+            streak_count := 1;
+            max_streak := 1;
+            last_completion := completion_dates[array_length(completion_dates, 1)]::timestamptz;
+
+            -- Calculate current streak
+            FOR i IN REVERSE array_length(completion_dates, 1)-1..1 LOOP
+                IF completion_dates[i] = current_date - 1 THEN
+                    streak_count := streak_count + 1;
+                    max_streak := GREATEST(max_streak, streak_count);
+                    current_date := completion_dates[i];
+                ELSE
+                    EXIT;
+                END IF;
+            END LOOP;
+
+            -- Update user_stats
+            UPDATE user_stats
+            SET current_streak = streak_count,
+                longest_streak = max_streak,
+                last_completion_date = last_completion
+            WHERE user_id = user_record.user_id;
+        END IF;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Run the recalculation for all users
+SELECT recalculate_all_streaks();

@@ -70,23 +70,23 @@ export default function AnalyticsPage() {
             ]);
 
             const weekLabels = [
-              'This Week',
-              'Last Week',
-              '2 Weeks Ago',
+              '4 Weeks Ago',
               '3 Weeks Ago',
-              '4 Weeks Ago'
+              '2 Weeks Ago',
+              'Last Week',
+              'This Week'
             ];
 
             return {
-              day: weekLabels[index],
+              day: weekLabels[4 - index], // Reverse the index to match reversed labels
               created: createdRes.count || 0,
               completed: completedRes.count || 0,
-              order: index // Add order to maintain sequence
+              order: 4 - index // Reverse the order
             };
           });
 
           chartData = (await Promise.all(weeklyDataPromises))
-            .sort((a, b) => a.order - b.order) // Sort by order
+            .sort((a, b) => a.order - b.order) // Sort by order (now reversed)
             .map(({ day, created, completed }) => ({ day, created, completed })); // Remove order from final data
         } else if (selectedTimeFrame === '1 week') {
           // Existing weekly view logic
@@ -168,12 +168,12 @@ export default function AnalyticsPage() {
               day: labelDate,
               created: createdRes.count || 0,
               completed: completedRes.count || 0,
-              order: index
+              order: 5 - index // Reverse the order (5 since we have 6 blocks, 0-5)
             };
           });
 
           chartData = (await Promise.all(twoWeekDataPromises))
-            .sort((a, b) => a.order - b.order)
+            .sort((a, b) => a.order - b.order) // Sort by order (now reversed)
             .map(({ day, created, completed }) => ({ day, created, completed }));
         }
 
