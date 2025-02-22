@@ -6,6 +6,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Hide scrollbars while maintaining scroll functionality */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
